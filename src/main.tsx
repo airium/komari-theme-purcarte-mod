@@ -214,7 +214,7 @@ const AppRoutes = ({
 
 export const AppContent = () => {
   const { siteStatus, mainWidth, selectedFooterStyle } = useAppConfig();
-  const { appearance, color } = useTheme();
+  const { color } = useTheme();
   const [searchTerm, setSearchTerm] = useState("");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -280,7 +280,7 @@ export const AppContent = () => {
 
   return (
     <Theme
-      appearance={appearance}
+      appearance="dark"
       accentColor={color}
       scaling="110%"
       style={themeStyle}>

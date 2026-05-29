@@ -62,10 +62,6 @@ export const defaultTexts = {
     grid: "Grid view", // 网格视图
     compact: "Compact view", // 紧凑视图
     table: "Table view", // 表格视图
-    toggleTheme: "Toggle theme", // 切换主题
-    lightMode: "Light mode", // 浅色模式
-    darkMode: "Dark mode", // 深色模式
-    systemMode: "Follow system", // 跟随系统
     admin: "Admin", // 管理员
     logoAlt: "Site logo", // 站点 Logo
   },

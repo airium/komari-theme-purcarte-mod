@@ -1,25 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Search,
-  Moon,
-  Sun,
-  SunMoon,
-  CircleUserIcon,
-  Menu,
-} from "lucide-react";
+import { Search, CircleUserIcon, Menu } from "lucide-react";
 import { forwardRef, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useAppConfig } from "@/config";
-import { useTheme } from "@/hooks/useTheme";
 import { useIsMobile } from "@/hooks/useMobile";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useLocale } from "@/config/hooks";
@@ -37,71 +26,6 @@ interface HeaderProps extends Partial<StatsBarProps> {
   setIsSettingsOpen?: (isOpen: boolean) => void;
   isSettingsOpen?: boolean;
 }
-
-const ThemeIcons = {
-  light: Sun,
-  dark: Moon,
-  system: SunMoon,
-};
-
-const ThemeMenuItems = ({
-  setAppearance,
-}: {
-  setAppearance: (appearance: "light" | "dark" | "system") => void;
-}) => {
-  const { t } = useLocale();
-  return (
-    <>
-      <DropdownMenuItem onClick={() => setAppearance("light")}>
-        <Sun className="size-4 mr-2 text-primary" />
-        <span>{t("header.lightMode")}</span>
-      </DropdownMenuItem>
-      <DropdownMenuItem onClick={() => setAppearance("dark")}>
-        <Moon className="size-4 mr-2 text-primary" />
-        <span>{t("header.darkMode")}</span>
-      </DropdownMenuItem>
-      <DropdownMenuItem onClick={() => setAppearance("system")}>
-        <SunMoon className="size-4 mr-2 text-primary" />
-        <span>{t("header.systemMode")}</span>
-      </DropdownMenuItem>
-    </>
-  );
-};
-
-const ThemeSwitcher = ({ isMobile }: { isMobile?: boolean }) => {
-  const { rawAppearance, setAppearance } = useTheme();
-  const { t } = useLocale();
-  const Icon = ThemeIcons[rawAppearance];
-
-  if (isMobile) {
-    return (
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger>
-          <Icon className="size-4 mr-2 text-primary" />
-          <span>{t("header.toggleTheme")}</span>
-        </DropdownMenuSubTrigger>
-        <DropdownMenuSubContent className="purcarte-blur border-(--accent-4)/50 rounded-xl">
-          <ThemeMenuItems setAppearance={setAppearance} />
-        </DropdownMenuSubContent>
-      </DropdownMenuSub>
-    );
-  }
-
-  return (
-    <DropdownMenu modal={false}>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <Icon className="size-5 text-primary" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className="purcarte-blur mt-[.5rem] border-(--accent-4)/50 rounded-xl">
-        <ThemeMenuItems setAppearance={setAppearance} />
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-};
 
 const AdminButton = ({ isMobile }: { isMobile?: boolean }) => {
   const { t } = useLocale();
@@ -294,7 +218,6 @@ export const Header = forwardRef<HTMLElement, HeaderProps>((props, ref) => {
                   <DropdownMenuContent
                     align="end"
                     className="purcarte-blur mt-[.5rem] border-(--accent-4)/50 rounded-xl">
-                    <ThemeSwitcher isMobile />
                     <AdminButton isMobile />
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -307,7 +230,6 @@ export const Header = forwardRef<HTMLElement, HeaderProps>((props, ref) => {
                     setSearchTerm={setSearchTerm!}
                   />
                 )}
-                <ThemeSwitcher />
                 <AdminButton />
               </>
             )}

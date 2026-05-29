@@ -14,7 +14,6 @@ export interface ConfigOptions {
   tagDefaultColorList: string; // 标签默认颜色列表
   selectThemeColor: ColorType; // 默认主题颜色
   enableLocalStorage: boolean; // 是否启用本地存储
-  selectedDefaultAppearance: AppearanceType; // 默认外观模式
   statusCardsVisibility: string; // 状态卡片显示控制
   selectedHeaderStyle: HeaderStyle; // 标题栏样式
   enableLogo: boolean; // 是否启用Logo
@@ -55,13 +54,12 @@ export const DEFAULT_CONFIG: ConfigOptions = {
   videoBackgroundUrlMobile: "",
   backgroundAlignment: "cover,top",
   blurValue: 10,
-  blurBackgroundColor: "rgba(255, 255, 255, 0.5)|rgba(0, 0, 0, 0.5)",
+  blurBackgroundColor: "rgba(0, 0, 0, 0.5)",
   enableTransparentTags: true,
   tagDefaultColorList:
     "ruby,gray,gold,bronze,brown,yellow,amber,orange,tomato,red",
   selectThemeColor: "violet",
   enableLocalStorage: true,
-  selectedDefaultAppearance: "system",
   statusCardsVisibility:
     "currentTime:true,currentOnline:true,regionOverview:true,trafficOverview:true,networkSpeed:true",
   selectedHeaderStyle: "fixed",
@@ -147,9 +145,6 @@ export const allColors: ColorType[] = [
   "mint",
   "sky",
 ];
-
-export type AppearanceType = "light" | "dark" | "system";
-export const allAppearance: AppearanceType[] = ["light", "dark", "system"];
 
 export type SiteStatus =
   | "public"

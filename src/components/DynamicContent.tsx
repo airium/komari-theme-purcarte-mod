@@ -1,23 +1,23 @@
 import { type ReactNode, useCallback, useMemo, useEffect } from "react";
 import { useAppConfig } from "@/config/hooks";
 import { useIsMobile } from "@/hooks/useMobile";
-import { useTheme } from "@/hooks/useTheme";
 
 export function DynamicContent({ children }: { children: ReactNode }) {
   const config = useAppConfig();
   const isMobile = useIsMobile();
-  const { appearance } = useTheme();
-
   const getUrlFromConfig = useCallback(
     (urls: string) => {
       if (!urls) return "";
-      const urlList = urls.split("|").map((u) => u.trim());
+      const urlList = urls
+        .split("|")
+        .map((u) => u.trim())
+        .filter(Boolean);
       if (urlList.length > 1) {
-        return appearance === "dark" ? urlList[1] : urlList[0];
+        return urlList[urlList.length - 1];
       }
-      return urlList[0];
+      return urlList[0] || "";
     },
-    [appearance]
+    []
   );
 
   const imageUrl = useMemo(() => {
@@ -45,13 +45,15 @@ export function DynamicContent({ children }: { children: ReactNode }) {
     styles.push(`--body-background-url: url(${imageUrl});`);
     styles.push(`--purcarte-blur: ${blurValue}px;`);
 
-    const colors = blurBackgroundColor.split("|").map((color) => color.trim());
-    if (colors.length >= 2) {
-      styles.push(`--card-light: ${colors[0]};`);
-      styles.push(`--card-dark: ${colors[1]};`);
-    } else if (colors.length === 1) {
-      styles.push(`--card-light: ${colors[0]};`);
-      styles.push(`--card-dark: ${colors[0]};`);
+    const colors = blurBackgroundColor
+      .split("|")
+      .map((color) => color.trim())
+      .filter(Boolean);
+    const darkColor =
+      colors.length > 1 ? colors[colors.length - 1] : colors[0];
+    if (darkColor) {
+      styles.push(`--card-light: ${darkColor};`);
+      styles.push(`--card-dark: ${darkColor};`);
     }
 
     return `:root { ${styles.join(" ")} }`;

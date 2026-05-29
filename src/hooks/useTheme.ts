@@ -1,15 +1,9 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import { useAppConfig } from "@/config";
-import { DEFAULT_CONFIG, allAppearance } from "@/config/default";
-import type { AppearanceType, ColorType } from "@/config/default";
-
-type themeAppearanceType = "light" | "dark";
-const defaultThemeAppearance: themeAppearanceType = "light";
+import { DEFAULT_CONFIG } from "@/config/default";
+import type { ColorType } from "@/config/default";
 
 export interface ThemeContextType {
-  appearance: themeAppearanceType;
-  rawAppearance: AppearanceType;
-  setAppearance: (appearance: AppearanceType) => void;
   color: ColorType;
   setColor: (color: ColorType) => void;
   statusCardsVisibility: {
@@ -25,9 +19,6 @@ export interface ThemeContextType {
 }
 
 export const ThemeContext = createContext<ThemeContextType>({
-  appearance: defaultThemeAppearance,
-  rawAppearance: DEFAULT_CONFIG.selectedDefaultAppearance as AppearanceType,
-  setAppearance: () => {},
   color: DEFAULT_CONFIG.selectThemeColor as ColorType,
   setColor: () => {},
   statusCardsVisibility: {
@@ -39,50 +30,6 @@ export const ThemeContext = createContext<ThemeContextType>({
   },
   setStatusCardsVisibility: () => {},
 });
-
-/**
- * 将 Radix UI 的 "system" 外观转换为实际的 "light" 或 "dark" 外观
- * @param appearance - 上下文中的外观设置（"light"、"dark" 或 "system"）。
- * 返回 Radix UI 已解析的外观（ "light" 或 "dark"）
- */
-export const useSystemTheme = (
-  appearance: AppearanceType
-): themeAppearanceType => {
-  const [systemTheme, setSystemTheme] = useState<themeAppearanceType>(() => {
-    // Initial system theme detection
-    if (typeof window !== "undefined" && window.matchMedia) {
-      return window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
-    }
-    return "light";
-  });
-
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) {
-      return;
-    }
-
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
-    const handleChange = (e: MediaQueryListEvent) => {
-      setSystemTheme(e.matches ? "dark" : "light");
-    };
-
-    // Add listener for system theme changes
-    mediaQuery.addEventListener("change", handleChange);
-
-    // Cleanup
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
-
-  // Return the resolved theme
-  if (appearance === "system") {
-    return systemTheme;
-  }
-
-  return appearance as themeAppearanceType;
-};
 
 const useStoredState = <T>(
   key: string,
@@ -123,14 +70,8 @@ const useStoredState = <T>(
 };
 
 export const useThemeManager = () => {
-  const { selectedDefaultAppearance, selectThemeColor } = useAppConfig();
+  const { selectThemeColor } = useAppConfig();
   const defaultstatusCardsVisibility = useAppConfig().statusCardsVisibility;
-
-  const [appearance, setAppearance] = useStoredState<AppearanceType>(
-    "appearance",
-    selectedDefaultAppearance,
-    (v): v is AppearanceType => allAppearance.includes(v)
-  );
 
   const [color, setColor] = useStoredState<ColorType>(
     "color",
@@ -159,12 +100,7 @@ export const useThemeManager = () => {
     setColor(selectThemeColor);
   }, [selectThemeColor, setColor]);
 
-  const resolvedAppearance = useSystemTheme(appearance);
-
   return {
-    appearance: resolvedAppearance,
-    rawAppearance: appearance,
-    setAppearance,
     color,
     setColor,
     statusCardsVisibility,
