@@ -41,10 +41,26 @@ const TagItem: React.FC<TagItemProps> = ({
 
   useLayoutEffect(() => {
     const element = tagRef.current;
-    if (element && element.scrollWidth > element.clientWidth) {
-      setIsOverflow(true);
+    if (!element) return;
+
+    const updateOverflow = () => {
+      const hasOverflow = element.scrollWidth > element.clientWidth;
+      setIsOverflow(hasOverflow);
+    };
+
+    updateOverflow();
+
+    if (typeof ResizeObserver === "undefined") {
+      if (typeof window === "undefined") return;
+      window.addEventListener("resize", updateOverflow);
+      return () => window.removeEventListener("resize", updateOverflow);
     }
-  }, [text]);
+
+    const observer = new ResizeObserver(updateOverflow);
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, [text, enableTransparentTags]);
 
   const tagContent = !enableTransparentTags ? (
     <Badge
