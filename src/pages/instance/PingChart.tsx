@@ -31,6 +31,7 @@ import {
   generateColor,
   lableFormatter,
 } from "@/utils/chartHelper";
+import { getLatencyMsColor, getLossRateColor } from "@/utils";
 import { useLocale } from "@/config/hooks";
 
 interface PingChartProps {
@@ -332,6 +333,34 @@ const PingChart = memo(({ node, initialHours = 1 }: PingChartProps) => {
     );
   };
 
+  const isLostValue = (value: any) =>
+    value === null ||
+    value === undefined ||
+    (typeof value === "number" && !Number.isFinite(value)) ||
+    (typeof value === "number" && value < 0);
+
+  const buildTooltipPayload = (props: any) => {
+    if (!props) return props?.payload;
+    const rowFromPayload = props.payload?.[0]?.payload;
+    const rowFromLabel =
+      rowFromPayload ||
+      chartData.find((item: any) => item.time === props.label);
+    if (!rowFromLabel) return props.payload;
+
+    return sortedTasks.map((task) => {
+      const dataKey = String(task.id);
+      const rawValue = rowFromLabel[dataKey];
+
+      return {
+        dataKey,
+        name: task.name,
+        value: rawValue === undefined ? null : rawValue,
+        payload: rowFromLabel,
+        color: generateColor(task.name, sortedTasks),
+      };
+    });
+  };
+
   return (
     <div className="relative space-y-4 h-full flex flex-col min-h-114">
       {loading && (
@@ -375,13 +404,19 @@ const PingChart = memo(({ node, initialHours = 1 }: PingChartProps) => {
                     }}>
                     <div className="font-semibold">{task.name}</div>
                     <div className="flex text-xs font-normal">
-                      <span>
-                        {task.value !== null
-                          ? `${task.value.toFixed(1)} ms | ${task.loss.toFixed(
-                              1
-                            )}%`
-                          : t("node.notAvailable")}
-                      </span>
+                      {task.value !== null && Number.isFinite(task.value) ? (
+                        <>
+                          <span style={{ color: getLatencyMsColor(task.value) }}>
+                            {`${Math.trunc(task.value)} ms`}
+                          </span>
+                          <span className="mx-1 text-secondary-foreground">|</span>
+                          <span style={{ color: getLossRateColor(task.loss) }}>
+                            {`${task.loss.toFixed(1)}%`}
+                          </span>
+                        </>
+                      ) : (
+                        <span>{t("node.notAvailable")}</span>
+                      )}
                     </div>
                   </div>
                 );
@@ -527,11 +562,20 @@ const PingChart = memo(({ node, initialHours = 1 }: PingChartProps) => {
                 />
                 <Tooltip
                   cursor={false}
-                  content={
+                  wrapperStyle={{ zIndex: 99 }}
+                  content={(props: any) => (
                     <CustomTooltip
+                      {...props}
+                      payload={buildTooltipPayload(props)}
                       labelFormatter={(value) => lableFormatter(value, hours)}
+                      renderValue={(value) =>
+                        isLostValue(value) ? "LOST" : undefined
+                      }
+                      getValueClassName={(value) =>
+                        isLostValue(value) ? "text-red-500" : undefined
+                      }
                     />
-                  }
+                  )}
                 />
                 {connectBreaks &&
                   breakPoints.map((point, index) => (

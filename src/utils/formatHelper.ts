@@ -29,6 +29,21 @@ const UPTIME_HOURS_COLOR_STOPS: Array<{ value: number; color: RGB }> = [
   { value: 10000, color: [255, 255, 255] },
 ];
 
+const LATENCY_MS_COLOR_STOPS: Array<{ value: number; color: RGB }> = [
+  { value: -50, color: [255, 255, 255] },
+  { value: 50, color: [34, 197, 94] },
+  { value: 150, color: [250, 204, 21] },
+  { value: 250, color: [239, 68, 68] },
+];
+
+const LOSS_RATE_ZERO_COLOR: RGB = [255, 255, 255];
+
+const LOSS_RATE_COLOR_STOPS: Array<{ value: number; color: RGB }> = [
+  { value: 1, color: [34, 197, 94] },
+  { value: 10, color: [250, 204, 21] },
+  { value: 100, color: [239, 68, 68] },
+];
+
 const pad2 = (value: number) => String(value).padStart(2, "0");
 
 const parseDateInput = (value: DateInput): Date | null => {
@@ -155,6 +170,31 @@ const mixColor = (from: RGB, to: RGB, ratio: number): RGB => {
 
 const rgbToCss = ([r, g, b]: RGB) => `rgb(${r} ${g} ${b})`;
 
+const getLinearScaleColor = (
+  value: number,
+  stops: Array<{ value: number; color: RGB }>
+) => {
+  if (!Number.isFinite(value)) {
+    return rgbToCss(stops[0].color);
+  }
+
+  if (value <= stops[0].value) {
+    return rgbToCss(stops[0].color);
+  }
+
+  for (let i = 0; i < stops.length - 1; i++) {
+    const from = stops[i];
+    const to = stops[i + 1];
+
+    if (value <= to.value) {
+      const ratio = (value - from.value) / (to.value - from.value);
+      return rgbToCss(mixColor(from.color, to.color, ratio));
+    }
+  }
+
+  return rgbToCss(stops[stops.length - 1].color);
+};
+
 const getLogScaleColor = (
   value: number,
   stops: Array<{ value: number; color: RGB }>
@@ -228,6 +268,27 @@ export const getExpiryDaysLeftColor = (daysLeft: number) =>
 
 export const getUptimeHoursColor = (hours: number) =>
   getLogScaleColor(hours, UPTIME_HOURS_COLOR_STOPS);
+
+export const getLatencyMsColor = (latencyMs: number) =>
+  getLinearScaleColor(latencyMs, LATENCY_MS_COLOR_STOPS);
+
+export const getLossRateColor = (lossRate: number) => {
+  if (!Number.isFinite(lossRate) || lossRate <= 0) {
+    return rgbToCss(LOSS_RATE_ZERO_COLOR);
+  }
+
+  if (lossRate <= LOSS_RATE_COLOR_STOPS[0].value) {
+    return rgbToCss(
+      mixColor(
+        LOSS_RATE_ZERO_COLOR,
+        LOSS_RATE_COLOR_STOPS[0].color,
+        clamp01(lossRate / LOSS_RATE_COLOR_STOPS[0].value)
+      )
+    );
+  }
+
+  return getLogScaleColor(lossRate, LOSS_RATE_COLOR_STOPS);
+};
 
 // Helper function to format bytes
 export const formatBytes = (

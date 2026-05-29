@@ -7,6 +7,8 @@ interface CustomTooltipProps {
   label?: any;
   chartConfig?: any;
   labelFormatter?: (label: any) => string;
+  renderValue?: (value: any, item: any) => any;
+  getValueClassName?: (value: any, item: any) => string | undefined;
 }
 
 export const CustomTooltip = ({
@@ -15,6 +17,8 @@ export const CustomTooltip = ({
   label,
   chartConfig,
   labelFormatter,
+  renderValue,
+  getValueClassName,
 }: CustomTooltipProps) => {
   const defaultLabelFormatter = useCallback(
     (value: any) => formatIsoDateTime(value, true, "-"),
@@ -23,13 +27,18 @@ export const CustomTooltip = ({
 
   if (active && payload && payload.length) {
     return (
-      <div className="purcarte-blur p-3 theme-card-style max-w-xs">
+      <div className="purcarte-blur p-3 theme-card-style w-max max-w-[90vw]">
         <p className="text-xs font-medium text-secondary-foreground mb-2">
           {labelFormatter
             ? labelFormatter(label)
             : defaultLabelFormatter(label)}
         </p>
-        <div className="space-y-1">
+        <div
+          className="grid gap-x-6 gap-y-1 auto-cols-max"
+          style={{
+            gridAutoFlow: "column",
+            gridTemplateRows: "repeat(14, minmax(0, auto))",
+          }}>
           {payload.map((item: any, index: number) => {
             const series = chartConfig?.series
               ? chartConfig.series.find((s: any) => s.dataKey === item.dataKey)
@@ -48,6 +57,15 @@ export const CustomTooltip = ({
               value = value?.toString() || "-";
             }
 
+            const customValue = renderValue
+              ? renderValue(item.value, item)
+              : undefined;
+            const valueClassName = getValueClassName
+              ? getValueClassName(item.value, item)
+              : undefined;
+            const displayValue =
+              customValue === undefined ? value : customValue;
+
             return (
               <div
                 key={`${item.dataKey}-${index}`}
@@ -61,7 +79,10 @@ export const CustomTooltip = ({
                     {series?.tooltipLabel || item.name || item.dataKey}:
                   </span>
                 </div>
-                <span className="text-sm font-bold ml-2">{value}</span>
+                <span
+                  className={`text-sm font-bold ml-2 ${valueClassName || ""}`}>
+                  {displayValue}
+                </span>
               </div>
             );
           })}

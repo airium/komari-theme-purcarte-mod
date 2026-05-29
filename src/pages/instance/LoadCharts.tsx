@@ -400,6 +400,7 @@ const LoadChartCard = ({
               />
               <Tooltip
                 cursor={false}
+                wrapperStyle={{ zIndex: 99 }}
                 content={(props: any) => (
                   <CustomTooltip
                     {...props}

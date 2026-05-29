@@ -247,11 +247,13 @@ const NodeTableRow = ({ node, enableListItemProgressBar }: NodeTableRowProps) =>
 
   return (
     <Card
-      className={
+      className={cn(
+        "relative",
+        isOpen ? "z-20" : "z-0",
         !isOnline
           ? "striped-bg-red-translucent-diagonal ring-2 ring-red-500/50"
           : ""
-      }>
+      )}>
       <div
         onClick={() => setIsOpen(!isOpen)}
         className="grid gap-x-2 gap-y-1 p-1.5 text-primary transition-colors duration-200 cursor-pointer items-center text-xs"
