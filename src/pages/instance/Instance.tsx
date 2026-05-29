@@ -294,8 +294,8 @@ const Instance = memo(({ node }: InstanceProps) => {
           className="border-r border-(--accent-7)/70"
           label={t("instancePage.lastUpdated")}
           value={
-            stats && isOnline
-              ? formatIsoDateTime(stats.time)
+            stats
+              ? formatIsoDateTime(stats.time, true, t("node.notAvailable"))
               : t("node.notAvailable")
           }
         />
