@@ -13,8 +13,6 @@ export interface ConfigOptions {
   enableTransparentTags: boolean; // 是否启用标签透明背景
   tagDefaultColorList: string; // 标签默认颜色列表
   selectThemeColor: ColorType; // 默认主题颜色
-  enableLocalStorage: boolean; // 是否启用本地存储
-  statusCardsVisibility: string; // 状态卡片显示控制
   selectedHeaderStyle: HeaderStyle; // 标题栏样式
   enableLogo: boolean; // 是否启用Logo
   logoUrl: string; // Logo图片URL
@@ -31,14 +29,12 @@ export interface ConfigOptions {
   isOfflineNodesBehind: boolean; // 是否启用离线节点置后显示
   enableGroupedBar: boolean; // 是否启用分组栏
   defaultSelectedGroup: string; // 默认选择展示分组
-  enableSwap: boolean; // 是否启用SWAP显示
   pingChartTimeInPreview: number; // 预览详情的延迟图表时间范围，单位为小时
   enableInstanceDetail: boolean; // 是否启用实例详情
   enablePingChart: boolean; // 是否启用延迟图表
   enableConnectBreaks: boolean; // 是否启用连接断点
   pingChartMaxPoints: number; // 延迟图表最大点数
   isShowHWBarInCard: boolean; // 是否在卡片中显示硬件信息栏
-  isShowValueUnderProgressBar: boolean; // 是否在流量进度条下方显示数值
   enableListItemProgressBar: boolean; // 是否启用列表视图进度条
   customTexts: string; // 自定义UI文本
 }
@@ -59,9 +55,6 @@ export const DEFAULT_CONFIG: ConfigOptions = {
   tagDefaultColorList:
     "ruby,gray,gold,bronze,brown,yellow,amber,orange,tomato,red",
   selectThemeColor: "violet",
-  enableLocalStorage: true,
-  statusCardsVisibility:
-    "currentTime:true,currentOnline:true,regionOverview:true,trafficOverview:true,networkSpeed:true",
   selectedHeaderStyle: "fixed",
   enableLogo: false,
   logoUrl: "/assets/logo.png",
@@ -78,14 +71,12 @@ export const DEFAULT_CONFIG: ConfigOptions = {
   isOfflineNodesBehind: false,
   enableGroupedBar: true,
   defaultSelectedGroup: "",
-  enableSwap: true,
   pingChartTimeInPreview: 1,
   enableInstanceDetail: true,
   enablePingChart: true,
   enableConnectBreaks: false,
   pingChartMaxPoints: 0,
   isShowHWBarInCard: true,
-  isShowValueUnderProgressBar: false,
   enableListItemProgressBar: true,
   customTexts: "",
 };

@@ -59,9 +59,6 @@ export const defaultTexts = {
   header: {
     _: "Header", // 标题栏
     toggleView: "Toggle view", // 切换视图
-    grid: "Grid view", // 网格视图
-    compact: "Compact view", // 紧凑视图
-    table: "Table view", // 表格视图
     admin: "Admin", // 管理员
     logoAlt: "Site logo", // 站点 Logo
   },
@@ -108,14 +105,12 @@ export const defaultTexts = {
   statsBar: {
     _: "Status Bar", // 状态栏
     currentTime: "Time", // 当前时间
-    displayOptionsTitle: "Status display settings", // 状态显示设置
     currentOnline: "Online", // 当前在线
     region: "Regions", // 点亮地区
     trafficShort: "Quota", // 流量
     traffic: "Traffic Overview", // 流量概览
     networkSpeedShort: "Speed", // 网速
     networkSpeed: "Realtime Network", // 网络速率
-    statsHidden: "Statistics are hidden", // 统计信息已隐藏
   },
   instancePage: {
     _: "Details Page", // 详情页

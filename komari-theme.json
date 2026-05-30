@@ -10,17 +10,6 @@
         "type": "managed",
         "data": [
             {
-                "name": "前端管理开关",
-                "type": "title"
-            },
-            {
-                "key": "isShowConfigEditButtonInLogined",
-                "name": "是否在登录时显示配置编辑按钮",
-                "type": "switch",
-                "default": true,
-                "help": "启用后将在登录时在标题栏最右侧显示配置编辑按钮，方便管理员进行主题配置"
-            },
-            {
                 "name": "样式调整",
                 "type": "title"
             },
@@ -117,34 +106,31 @@
                 "help": "设置默认主题颜色，颜色对照请参考：https://www.radix-ui.com/themes/docs/theme/color"
             },
             {
-                "name": "浏览器本地存储配置",
-                "type": "title"
-            },
-            {
-                "key": "enableLocalStorage",
-                "name": "启用 localStorage 配置",
-                "type": "switch",
-                "default": true,
-                "help": "启用后将优先使用用户浏览器本地配置的视图和外观设置。关闭后将强制使用下方的主题配置，本地可调整但刷新即恢复"
-            },
-            {
-                "key": "statusCardsVisibility",
-                "name": "状态卡片显示控制",
-                "type": "string",
-                "default": "currentTime:true,currentOnline:true,regionOverview:true,trafficOverview:true,networkSpeed:true",
-                "help": "控制状态卡片的显示与隐藏，格式为 卡片名称:显示状态（true/false），多个卡片使用逗号分隔，支持的卡片名称包括 currentTime（当前时间）, currentOnline（当前在线）, regionOverview（点亮地区）, trafficOverview（流量概览）, networkSpeed（网络速率）"
-            },
-            {
-                "name": "标题栏设置",
-                "type": "title"
-            },
-            {
                 "key": "selectedHeaderStyle",
                 "name": "标题栏样式",
                 "type": "select",
                 "options": "fixed,levitation",
                 "default": "fixed",
                 "help": "设置标题栏样式为 fixed（固定）或 levitation（悬浮）"
+            },
+            {
+                "key": "selectedFooterStyle",
+                "name": "底栏样式",
+                "type": "select",
+                "options": "fixed,levitation,followContent,hidden",
+                "default": "fixed",
+                "help": "设置底栏样式为 fixed（固定）, levitation（悬浮）, followContent（跟随内容）或 hidden（隐藏）"
+            },
+            {
+                "name": "内容设置",
+                "type": "title"
+            },
+            {
+                "key": "isShowConfigEditButtonInLogined",
+                "name": "是否在登录时显示配置编辑按钮",
+                "type": "switch",
+                "default": true,
+                "help": "启用后将在登录时在标题栏最右侧显示配置编辑按钮，方便管理员进行主题配置"
             },
             {
                 "key": "enableLogo",
@@ -188,22 +174,6 @@
                 "type": "switch",
                 "default": true,
                 "help": "启用后默认在标题栏右侧显示管理按钮"
-            },
-            {
-                "name": "底栏设置",
-                "type": "title"
-            },
-            {
-                "key": "selectedFooterStyle",
-                "name": "底栏样式",
-                "type": "select",
-                "options": "fixed,levitation,followContent,hidden",
-                "default": "fixed",
-                "help": "设置底栏样式为 fixed（固定）, levitation（悬浮）, followContent（跟随内容）或 hidden（隐藏）"
-            },
-            {
-                "name": "内容设置",
-                "type": "title"
             },
             {
                 "key": "enableJsonRPC2Api",
@@ -262,13 +232,6 @@
                 "help": "设置默认选择展示的分组，填写后端设置的分组名，留空则默认展示“所有”分组"
             },
             {
-                "key": "enableSwap",
-                "name": "启用 SWAP 显示",
-                "type": "switch",
-                "default": true,
-                "help": "启用后默认显示 SWAP 信息"
-            },
-            {
                 "key": "pingChartTimeInPreview",
                 "name": "预览详情的延迟图表时间范围",
                 "type": "number",
@@ -283,22 +246,11 @@
                 "help": "启用后将在节点卡片中标题栏之下显示硬件信息栏（CPU、内存和硬盘总量）"
             },
             {
-                "key": "isShowValueUnderProgressBar",
-                "name": "是否在流量进度条下方显示数值",
-                "type": "switch",
-                "default": false,
-                "help": "启用后将在内存、SWAP、硬盘占用情况进度条下方显示实际占用数值"
-            },
-            {
                 "key": "enableListItemProgressBar",
                 "name": "启用列表视图进度条",
                 "type": "switch",
                 "default": true,
                 "help": "启用后列表视图中将会显示进度条来表示使用率"
-            },
-            {
-                "name": "Instance 设置",
-                "type": "title"
             },
             {
                 "key": "enableInstanceDetail",

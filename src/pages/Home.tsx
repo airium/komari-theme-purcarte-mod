@@ -5,7 +5,6 @@ import Loading from "@/components/loading";
 import type { NodeData } from "@/types/node";
 import { useNodeData } from "@/contexts/NodeDataContext";
 import { useAppConfig } from "@/config";
-import { useTheme } from "@/hooks/useTheme";
 import {
   Card,
   CardDescription,
@@ -37,7 +36,6 @@ const HomePage: React.FC<HomePageProps> = ({
   groups,
   handleSort,
 }) => {
-  const { statusCardsVisibility, setStatusCardsVisibility } = useTheme();
   const { loading, error, refreshNodes } = useNodeData();
   const {
     enableGroupedBar,
@@ -60,8 +58,6 @@ const HomePage: React.FC<HomePageProps> = ({
     <div className="fade-in my-4">
       {enableStatsBar && (!isShowStatsInHeader || isMobile) && (
         <StatsBar
-          displayOptions={statusCardsVisibility}
-          setDisplayOptions={setStatusCardsVisibility}
           stats={stats}
           loading={loading}
           isShowStatsInHeader={isShowStatsInHeader}

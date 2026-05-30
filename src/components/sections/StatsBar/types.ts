@@ -1,11 +1,3 @@
-export type DisplayOptions = {
-  currentTime: boolean;
-  currentOnline: boolean;
-  regionOverview: boolean;
-  trafficOverview: boolean;
-  networkSpeed: boolean;
-};
-
 export type StatsSnapshot = {
   onlineCount: number;
   totalCount: number;
@@ -24,8 +16,6 @@ export type SortKey =
   | null;
 
 export interface StatsBarProps {
-  displayOptions: DisplayOptions;
-  setDisplayOptions: (options: Partial<DisplayOptions>) => void;
   stats: StatsSnapshot;
   loading: boolean;
   enableGroupedBar?: boolean;

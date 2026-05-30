@@ -69,13 +69,10 @@ const AppRoutes = ({
     setSelectedGroup,
     handleSort,
   } = useNodeListCommons(searchTerm);
-  const { statusCardsVisibility, setStatusCardsVisibility } = useTheme();
   const { enableGroupedBar, selectedHeaderStyle, selectedFooterStyle } =
     useAppConfig();
 
   const statsBarProps: StatsBarProps = {
-    displayOptions: statusCardsVisibility,
-    setDisplayOptions: setStatusCardsVisibility,
     stats,
     loading,
     enableGroupedBar,

@@ -10,7 +10,6 @@ import { useIsMobile } from "@/hooks/useMobile";
 import { CurrentTimeChip, StatChip } from "./StatChips";
 import { GroupSelector } from "./GroupSelector";
 import { SortToggleMenu } from "./SortToggleMenu";
-import { StatsToggleMenu } from "./StatsToggleMenu";
 import { useLocale } from "@/config/hooks";
 import type { StatsBarProps, SortKey } from "./types";
 import { Card } from "@/components/ui/card";
@@ -26,8 +25,6 @@ interface StatEntry {
 
 export const StatsBar = (props: StatsBarProps) => {
   const {
-    displayOptions,
-    setDisplayOptions,
     stats,
     loading,
     groups,
@@ -79,26 +76,24 @@ export const StatsBar = (props: StatsBarProps) => {
     const getLabel = (compactLabel: string, fullLabel: string) =>
       isShowStatsInHeader ? (isMobile ? fullLabel : compactLabel) : fullLabel;
 
-    const entries: StatEntry[] = [];
-    if (displayOptions.currentOnline) {
-      entries.push({
+    const upColor = getNetworkSpeedColor(stats.currentSpeedUp);
+    const downColor = getNetworkSpeedColor(stats.currentSpeedDown);
+
+    return [
+      {
         key: "currentOnline",
         label: getLabel(
           t("statsBar.currentOnline"),
           t("statsBar.currentOnline")
         ),
         lines: [loading ? "..." : `${stats.onlineCount} / ${stats.totalCount}`],
-      });
-    }
-    if (displayOptions.regionOverview) {
-      entries.push({
+      },
+      {
         key: "regionOverview",
         label: getLabel(t("statsBar.region"), t("statsBar.region")),
         lines: [loading ? "..." : String(stats.uniqueRegions)],
-      });
-    }
-    if (displayOptions.trafficOverview) {
-      entries.push({
+      },
+      {
         key: "trafficOverview",
         label: getLabel("", t("statsBar.traffic")),
         lines: loading
@@ -111,12 +106,8 @@ export const StatsBar = (props: StatsBarProps) => {
             ],
         isLabelVertical: !isMobile && isShowStatsInHeader,
         textLeft: true,
-      });
-    }
-    if (displayOptions.networkSpeed) {
-      const upColor = getNetworkSpeedColor(stats.currentSpeedUp);
-      const downColor = getNetworkSpeedColor(stats.currentSpeedDown);
-      entries.push({
+      },
+      {
         key: "networkSpeed",
         label: getLabel("", t("statsBar.networkSpeed")),
         lines: loading
@@ -135,12 +126,9 @@ export const StatsBar = (props: StatsBarProps) => {
             ],
         isLabelVertical: !isMobile && isShowStatsInHeader,
         textLeft: true,
-      });
-    }
-    return entries;
-  }, [displayOptions, loading, stats, isMobile, isShowStatsInHeader, t]);
-
-  const hasVisibleStats = Object.values(displayOptions).some(Boolean);
+      },
+    ];
+  }, [loading, stats, isMobile, isShowStatsInHeader, t]);
 
   if (isShowStatsInHeader && !isMobile) {
     return (
@@ -153,9 +141,7 @@ export const StatsBar = (props: StatsBarProps) => {
           />
         )}
         <div className="flex items-center gap-1.5">
-          {displayOptions.currentTime && (
-            <CurrentTimeChip isInHeader={true} isMobile={isMobile} />
-          )}
+          <CurrentTimeChip isInHeader={true} isMobile={isMobile} />
           {resolvedStats.map(({ key, ...rest }) => (
             <StatChip
               key={key}
@@ -164,10 +150,6 @@ export const StatsBar = (props: StatsBarProps) => {
               isMobile={isMobile}
             />
           ))}
-          <StatsToggleMenu
-            displayOptions={displayOptions}
-            setDisplayOptions={setDisplayOptions}
-          />
           {enableSortControl && (
             <SortToggleMenu
               onSort={handleSort}
@@ -185,9 +167,7 @@ export const StatsBar = (props: StatsBarProps) => {
       return "repeat(auto-fit, minmax(100px, 1fr))";
     }
     const visibleCount =
-      resolvedStats.length +
-      (displayOptions.currentTime ? 1 : 0) +
-      (enableGroupedBar && mergeGroupsWithStats ? 1 : 0);
+      resolvedStats.length + 1 + (enableGroupedBar && mergeGroupsWithStats ? 1 : 0);
 
     return visibleCount >= 5 ? "repeat(3, 1fr)" : "repeat(2, 1fr)";
   };
@@ -214,26 +194,10 @@ export const StatsBar = (props: StatsBarProps) => {
           </div>
         )}
 
-        {hasVisibleStats ? (
-          <>
-            {displayOptions.currentTime && (
-              <CurrentTimeChip isMobile={isMobile} />
-            )}
-            {resolvedStats.map(({ key, ...rest }) => (
-              <StatChip key={key} {...rest} isMobile={isMobile} />
-            ))}
-          </>
-        ) : (
-          <span className="text-xs text-secondary-foreground">
-            {t("statsBar.statsHidden")}
-          </span>
-        )}
-      </div>
-      <div className="absolute right-2 top-2">
-        <StatsToggleMenu
-          displayOptions={displayOptions}
-          setDisplayOptions={setDisplayOptions}
-        />
+        <CurrentTimeChip isMobile={isMobile} />
+        {resolvedStats.map(({ key, ...rest }) => (
+          <StatChip key={key} {...rest} isMobile={isMobile} />
+        ))}
       </div>
       {enableSortControl && (
         <div className="absolute right-2">

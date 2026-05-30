@@ -69,13 +69,6 @@
 >
 > 本主题支持通过 Komari 后台或前端进行详细配置，所有可用选项如下
 
-#### 前端管理开关
-
-- **是否在登录时显示配置编辑按钮** (`isShowConfigEditButtonInLogined`)
-  - **类型:** `switch`
-  - **默认值:** `true`
-  - **说明:** 启用后将在登录时在标题栏最右侧显示配置编辑按钮，方便管理员进行主题配置
-
 #### 样式调整
 
 - **主要内容宽度** (`mainWidth`)
@@ -144,37 +137,24 @@
   - **默认值:** `violet`
   - **说明:** 设置默认主题颜色，颜色对照请参考：[Radix Color](https://www.radix-ui.com/themes/docs/theme/color)
 
-#### 浏览器本地存储配置
-
-- **启用 localStorage 配置** (`enableLocalStorage`)
-  - **类型:** `switch`
-  - **默认值:** `true`
-  - **说明:** 启用后将优先使用用户浏览器本地配置的视图和外观设置。关闭后将强制使用下方的主题配置，本地可调整但刷新即恢复
-
-- **桌面端默认展示视图** (`selectedDefaultView`)
-  - **类型:** `select`
-  - **可选项:** `grid`, `table`, `compact`
-  - **默认值:** `grid`
-  - **说明:** 设置默认展示视图为网格、表格或紧凑型
-
-- **默认外观** (`selectedDefaultAppearance`)
-  - **类型:** `select`
-  - **可选项:** `system`, `light`, `dark`
-  - **默认值:** `system`
-  - **说明:** 设置默认外观为浅色、深色或系统主题
-
-- **状态卡片显示控制** (`statusCardsVisibility`)
-  - **类型:** `string`
-  - **默认值:** `currentTime:true,currentOnline:true,regionOverview:true,trafficOverview:true,networkSpeed:true`
-  - **说明:** 控制状态卡片的显示与隐藏，格式为 卡片名称:显示状态（true/false），多个卡片使用逗号分隔，支持的卡片名称包括 currentTime（当前时间）, currentOnline（当前在线）, regionOverview（点亮地区）, trafficOverview（流量概览）, networkSpeed（网络速率）
-
-#### 标题栏设置
-
 - **标题栏样式** (`selectedHeaderStyle`)
   - **类型:** `select`
   - **可选项:** `fixed`, `levitation`
   - **默认值:** `fixed`
   - **说明:** 设置标题栏样式为 fixed（固定）或 levitation（悬浮）
+
+- **底栏样式** (`selectedFooterStyle`)
+  - **类型:** `select`
+  - **可选项:** `fixed`, `levitation`, `followContent`, `hidden`
+  - **默认值:** `fixed`
+  - **说明:** 设置底栏样式为 fixed（固定）, levitation（悬浮）, followContent（跟随内容）或 hidden（隐藏）
+
+#### 内容设置
+
+- **是否在登录时显示配置编辑按钮** (`isShowConfigEditButtonInLogined`)
+  - **类型:** `switch`
+  - **默认值:** `true`
+  - **说明:** 启用后将在登录时在标题栏最右侧显示配置编辑按钮，方便管理员进行主题配置
 
 - **启用标题栏左侧 Logo** (`enableLogo`)
   - **类型:** `switch`
@@ -205,16 +185,6 @@
   - **类型:** `switch`
   - **默认值:** `true`
   - **说明:** 启用后默认在标题栏右侧显示管理按钮
-
-#### 底栏设置
-
-- **底栏样式** (`selectedFooterStyle`)
-  - **类型:** `select`
-  - **可选项:** `fixed`, `levitation`, `followContent`, `hidden`
-  - **默认值:** `fixed`
-  - **说明:** 设置底栏样式为 fixed（固定）, levitation（悬浮）, followContent（跟随内容）或 hidden（隐藏）
-
-#### 内容设置
 
 - **启用 JSON-RPC2 API 适配（实验性，未完全支持特性）** (`enableJsonRPC2Api`)
   - **类型:** `switch`
@@ -262,11 +232,6 @@
   - **默认值:** `grid`
   - **说明:** 设置移动端默认展示视图为网格、表格或紧凑型
 
-- **启用 SWAP 显示** (`enableSwap`)
-  - **类型:** `switch`
-  - **默认值:** `true`
-  - **说明:** 启用后默认显示 SWAP 信息
-
 - **预览详情的延迟图表时间范围** (`pingChartTimeInPreview`)
   - **类型:** `number`
   - **默认值:** `1`
@@ -276,11 +241,6 @@
   - **类型:** `switch`
   - **默认值:** `true`
   - **说明:** 启用后将在节点卡片中标题栏之下显示硬件信息栏（CPU、内存和硬盘总量）
-
-- **是否在流量进度条下方显示数值** (`isShowValueUnderProgressBar`)
-  - **类型:** `switch`
-  - **默认值:** `false`
-  - **说明:** 启用后将在内存、SWAP、硬盘占用情况进度条下方显示实际占用数值
 
 - **流量进度条样式** (`selectTrafficProgressStyle`)
   - **类型:** `select`
@@ -292,8 +252,6 @@
   - **类型:** `switch`
   - **默认值:** `true`
   - **说明:** 启用后列表视图中将会显示进度条来表示使用率
-
-#### Instance 设置
 
 - **启用 Instance 详情信息** (`enableInstanceDetail`)
   - **类型:** `switch`

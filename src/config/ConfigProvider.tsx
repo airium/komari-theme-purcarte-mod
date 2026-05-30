@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useState, useMemo } from "react";
+import { type ReactNode, useCallback, useEffect, useState, useMemo } from "react";
 import type { PublicInfo } from "@/types/node.d";
 import { ConfigContext } from "./ConfigContext";
 import { DEFAULT_CONFIG, type ConfigOptions, type SiteStatus } from "./default";
@@ -11,6 +11,20 @@ import { mergeTexts, deepMerge } from "@/utils/localeUtils";
 interface ConfigProviderProps {
   children: ReactNode;
 }
+
+const sanitizeThemeSettings = (
+  themeSettings: Partial<ConfigOptions> | null | undefined
+): Partial<ConfigOptions> => {
+  if (!themeSettings) {
+    return {};
+  }
+
+  return Object.fromEntries(
+    Object.keys(DEFAULT_CONFIG)
+      .filter((key) => Object.prototype.hasOwnProperty.call(themeSettings, key))
+      .map((key) => [key, themeSettings[key as keyof ConfigOptions]])
+  ) as Partial<ConfigOptions>;
+};
 
 /**
  * 配置提供者组件，用于将配置传递给子组件
@@ -32,8 +46,9 @@ export function ConfigProvider({ children }: ConfigProviderProps) {
 
       let mergedConfig: ConfigOptions;
       if (publicInfo) {
-        const themeSettings =
-          (publicInfo.theme_settings as ConfigOptions) || {};
+        const themeSettings = sanitizeThemeSettings(
+          publicInfo.theme_settings as Partial<ConfigOptions>
+        );
         mergedConfig = {
           ...DEFAULT_CONFIG,
           ...themeSettings,
@@ -90,9 +105,21 @@ export function ConfigProvider({ children }: ConfigProviderProps) {
     return deepMerge(baseTexts, otherTexts);
   }, [config, previewConfig]);
 
-  const updatePreviewConfig = (newConfig: Partial<ConfigOptions>) => {
-    setPreviewConfig(newConfig);
-  };
+  const updatePreviewConfig = useCallback((newConfig: Partial<ConfigOptions>) => {
+    const sanitizedConfig = sanitizeThemeSettings(newConfig);
+    const nextPreviewConfig =
+      Object.keys(sanitizedConfig).length > 0 ? sanitizedConfig : null;
+
+    setPreviewConfig((prev) => {
+      if (
+        JSON.stringify(prev ?? {}) === JSON.stringify(nextPreviewConfig ?? {})
+      ) {
+        return prev;
+      }
+
+      return nextPreviewConfig;
+    });
+  }, []);
 
   const reloadConfig = async () => {
     setLoading(true);
