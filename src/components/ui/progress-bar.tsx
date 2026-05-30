@@ -1,4 +1,4 @@
-import { getProgressBarClass } from "@/utils";
+import { getProgressBarColor } from "@/utils";
 
 export const ProgressBar = ({
   value,
@@ -12,15 +12,14 @@ export const ProgressBar = ({
   const clampedValue = Math.max(0, Math.min(100, value));
   const progressRoundedClass =
     clampedValue < 10 ? "rounded-sm" : "rounded-full";
+  const progressColor = getProgressBarColor(clampedValue);
 
   return (
     <div
       className={`w-full bg-(--accent-4)/50 dark:bg-(--accent-a5) rounded-full ${h} overflow-hidden`}>
       <div
-        className={`${h} ${progressRoundedClass} transition-all duration-500 ${getProgressBarClass(
-          clampedValue
-        )} ${className}`}
-        style={{ width: `${clampedValue}%` }}></div>
+        className={`${h} ${progressRoundedClass} transition-all duration-500 ${className}`}
+        style={{ width: `${clampedValue}%`, backgroundColor: progressColor }}></div>
     </div>
   );
 };

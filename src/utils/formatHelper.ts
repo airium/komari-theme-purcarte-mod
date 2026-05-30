@@ -44,6 +44,13 @@ const LOSS_RATE_COLOR_STOPS: Array<{ value: number; color: RGB }> = [
   { value: 100, color: [239, 68, 68] },
 ];
 
+const PROGRESS_USAGE_COLOR_STOPS: Array<{ value: number; color: RGB }> = [
+  { value: 100 / 33, color: [255, 255, 255] },
+  { value: 10, color: [34, 197, 94] },
+  { value: 100 / 3, color: [250, 204, 21] },
+  { value: 100, color: [239, 68, 68] },
+];
+
 const pad2 = (value: number) => String(value).padStart(2, "0");
 
 const parseDateInput = (value: DateInput): Date | null => {
@@ -153,6 +160,16 @@ export const formatNetworkSpeedMbps = (
   if (!Number.isFinite(bytesPerSecond)) return fallback;
 
   const mbps = bytesPerSecondToMbps(bytesPerSecond);
+  if (mbps >= 1000) {
+    const gbps = mbps / 1000;
+    const formatted = formatSignificantDigits(
+      gbps,
+      significantDigits,
+      fallback
+    );
+    return formatted === fallback ? fallback : `${formatted} Gbps`;
+  }
+
   const formatted = formatSignificantDigits(mbps, significantDigits, fallback);
   return formatted === fallback ? fallback : `${formatted} Mbps`;
 };
@@ -418,8 +435,5 @@ export const formatTrafficLimit = (
   return `${typeText}: ${limitText}`;
 };
 
-export const getProgressBarClass = (percentage: number) => {
-  if (percentage > 90) return "bg-red-600";
-  if (percentage > 50) return "bg-yellow-400";
-  return "bg-green-500";
-};
+export const getProgressBarColor = (percentage: number) =>
+  getLogScaleColor(percentage, PROGRESS_USAGE_COLOR_STOPS);
