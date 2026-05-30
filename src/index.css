@@ -3,6 +3,47 @@
 @import "tailwindcss/preflight";
 @import "tailwindcss/utilities";
 
+/* Fira Sans Condensed (bundled) */
+@font-face {
+  font-family: "Fira Sans Condensed";
+  src: local("Fira Sans Condensed"),
+    url("/assets/fonts/fira-sans-condensed-latin-400-normal.woff2")
+      format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Fira Sans Condensed";
+  src: local("Fira Sans Condensed"),
+    url("/assets/fonts/fira-sans-condensed-latin-500-normal.woff2")
+      format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Fira Sans Condensed";
+  src: local("Fira Sans Condensed"),
+    url("/assets/fonts/fira-sans-condensed-latin-600-normal.woff2")
+      format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Fira Sans Condensed";
+  src: local("Fira Sans Condensed"),
+    url("/assets/fonts/fira-sans-condensed-latin-700-normal.woff2")
+      format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -83,7 +124,8 @@
   --purcarte-blur: 10px;
   --body-background-url: url("");
 
-  --purcarte-font-sans: "Ubuntu", "Fira Sans", "NotoEmoji", system-ui, sans-serif;
+  --purcarte-font-sans: "Fira Sans Condensed", "Fira Sans", "Ubuntu", "NotoEmoji",
+    system-ui, sans-serif;
   --purcarte-font-mono: "Monaspace Neon", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 }
 
