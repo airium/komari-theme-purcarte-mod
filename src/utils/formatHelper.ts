@@ -45,10 +45,10 @@ const LOSS_RATE_COLOR_STOPS: Array<{ value: number; color: RGB }> = [
 ];
 
 const PROGRESS_USAGE_COLOR_STOPS: Array<{ value: number; color: RGB }> = [
-  { value: 100 / 33, color: [255, 255, 255] },
-  { value: 10, color: [34, 197, 94] },
-  { value: 100 / 3, color: [250, 204, 21] },
-  { value: 100, color: [239, 68, 68] },
+  { value: 1, color: [255, 255, 255] },
+  { value: 30, color: [34, 197, 94] },
+  { value: 60, color: [250, 204, 21] },
+  { value: 90, color: [239, 68, 68] },
 ];
 
 const pad2 = (value: number) => String(value).padStart(2, "0");
