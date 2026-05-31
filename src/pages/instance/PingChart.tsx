@@ -28,7 +28,6 @@ import { CustomTooltip } from "@/components/ui/tooltip";
 import Tips from "@/components/ui/tips";
 import {
   formatTwoLineTimeLabel,
-  generateColor,
   lableFormatter,
 } from "@/utils/chartHelper";
 import { getLatencyMsColor, getLossRateColor } from "@/utils";
@@ -161,32 +160,28 @@ const PingChart = memo(({ node, initialHours = 1 }: PingChartProps) => {
       }
       const use = anchor ?? ts;
       if (!grouped[use]) {
-        grouped[use] = { time: new Date(use).toISOString() };
+        grouped[use] = { time: use };
         if (anchor === null) anchors.push(use);
       }
       grouped[use][rec.task_id] = rec.value < 0 ? null : rec.value;
     }
     const merged = Object.values(grouped).sort(
-      (a: any, b: any) =>
-        new Date(a.time).getTime() - new Date(b.time).getTime()
+      (a: any, b: any) => a.time - b.time
     );
 
     if (!merged.length) return [];
 
-    const lastTs = new Date(
-      (merged as any[])[(merged as any[]).length - 1].time
-    ).getTime();
+    const lastTs = merged[merged.length - 1].time;
     const fromTs = lastTs - hours * 3600_000;
     let startIdx = 0;
-    for (let i = 0; i < (merged as any[]).length; i++) {
-      const ts = new Date((merged as any[])[i].time).getTime();
+    for (let i = 0; i < merged.length; i++) {
+      const ts = merged[i].time;
       if (ts >= fromTs) {
         startIdx = Math.max(0, i - 1);
         break;
       }
     }
-    const clipped = (merged as any[]).slice(startIdx);
-    return clipped;
+    return merged.slice(startIdx);
   }, [pingHistory, hours]);
 
   const chartData = useMemo(() => {
@@ -233,10 +228,7 @@ const PingChart = memo(({ node, initialHours = 1 }: PingChartProps) => {
       full = sampledData;
     }
 
-    return full.map((d: any) => ({
-      ...d,
-      time: new Date(d.time).getTime(),
-    }));
+    return full;
   }, [midData, cutPeak, pingHistory?.tasks, pingChartMaxPoints]);
 
   const handleTaskVisibilityToggle = (taskId: number) => {
@@ -261,6 +253,29 @@ const PingChart = memo(({ node, initialHours = 1 }: PingChartProps) => {
     return [...pingHistory.tasks].sort((a, b) => a.weight - b.weight);
   }, [pingHistory?.tasks]);
 
+  const taskColors = useMemo(() => {
+    const colors: Record<number, string> = {};
+
+    if (!sortedTasks.length) {
+      return colors;
+    }
+
+    const supportsOklch =
+      typeof window !== "undefined" &&
+      window.CSS &&
+      CSS.supports("color", "oklch(0.7 0.2 0 / .8)");
+    const total = sortedTasks.length;
+
+    sortedTasks.forEach((task, index) => {
+      const hue = (index * (360 / total)) % 360;
+      colors[task.id] = supportsOklch
+        ? `oklch(0.7 0.2 ${hue} / .8)`
+        : `hsl(${hue}, 50%, 60%)`;
+    });
+
+    return colors;
+  }, [sortedTasks]);
+
   const breakPoints = useMemo(() => {
     if (!connectBreaks || !chartData || chartData.length < 2) {
       return [];
@@ -284,13 +299,13 @@ const PingChart = memo(({ node, initialHours = 1 }: PingChartProps) => {
         if (isBreak) {
           points.push({
             x: currentPoint.time,
-            color: generateColor(task.name, sortedTasks),
+            color: taskColors[task.id] || "#000000",
           });
         }
       }
     }
     return points;
-  }, [chartData, sortedTasks, visiblePingTasks, connectBreaks]);
+  }, [chartData, sortedTasks, visiblePingTasks, connectBreaks, taskColors]);
 
   const taskStats = useMemo(() => {
     if (!pingHistory?.records || !sortedTasks.length) return [];
@@ -306,10 +321,10 @@ const PingChart = memo(({ node, initialHours = 1 }: PingChartProps) => {
         value: latestValue,
         time: latestTime,
         loss: loss,
-        color: generateColor(task.name, sortedTasks),
+        color: taskColors[task.id] || "#000000",
       };
     });
-  }, [pingHistory?.records, sortedTasks, timeRange]);
+  }, [pingHistory?.records, sortedTasks, timeRange, taskColors]);
 
   const renderTwoLineTick = ({ x, y, payload }: any) => {
     const { time, date } = formatTwoLineTimeLabel(payload?.value);
@@ -356,7 +371,7 @@ const PingChart = memo(({ node, initialHours = 1 }: PingChartProps) => {
         name: task.name,
         value: rawValue === undefined ? null : rawValue,
         payload: rowFromLabel,
-        color: generateColor(task.name, sortedTasks),
+        color: taskColors[task.id] || "#000000",
       };
     });
   };
@@ -590,13 +605,14 @@ const PingChart = memo(({ node, initialHours = 1 }: PingChartProps) => {
                 {sortedTasks.map((task) => (
                   <Line
                     key={task.id}
-                    type={"monotone"}
+                    type={"linear"}
                     dataKey={String(task.id)}
                     name={task.name}
-                    stroke={generateColor(task.name, sortedTasks)}
+                    stroke={taskColors[task.id] || "#000000"}
                     strokeWidth={2}
                     hide={!visiblePingTasks.includes(task.id)}
                     dot={false}
+                    isAnimationActive={false}
                     connectNulls={connectBreaks}
                   />
                 ))}

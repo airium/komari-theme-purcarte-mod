@@ -75,7 +75,7 @@ export const DEFAULT_CONFIG: ConfigOptions = {
   enableInstanceDetail: true,
   enablePingChart: true,
   enableConnectBreaks: false,
-  pingChartMaxPoints: 0,
+  pingChartMaxPoints: 1440,
   isShowHWBarInCard: true,
   enableListItemProgressBar: true,
   customTexts: "",
