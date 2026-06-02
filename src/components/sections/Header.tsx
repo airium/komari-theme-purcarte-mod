@@ -152,7 +152,6 @@ export const Header = forwardRef<HTMLElement, HeaderProps>((props, ref) => {
     titleText,
     enableLogo,
     logoUrl,
-    isShowStatsInHeader,
     siteStatus,
     isShowConfigEditButtonInLogined,
   } = useAppConfig();
@@ -172,8 +171,8 @@ export const Header = forwardRef<HTMLElement, HeaderProps>((props, ref) => {
         right: isSettingsOpen && !isMobile ? "var(--setting-width)" : "0",
       }}>
       <Card className="rounded-none w-full flex items-center justify-center">
-        <div className="w-(--main-width) py-2 flex items-center justify-between">
-          <div className="flex items-center theme-text-shadow text-accent-foreground">
+        <div className="w-(--main-width) py-2 flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center theme-text-shadow text-accent-foreground">
             <a href="/" className="flex items-center gap-2 text-2xl font-bold">
               {enableLogo && logoUrl && (
                 <img src={logoUrl} alt={t("header.logoAlt")} className="h-8" />
@@ -182,16 +181,13 @@ export const Header = forwardRef<HTMLElement, HeaderProps>((props, ref) => {
             </a>
           </div>
 
-          {!isInstancePage &&
-            isShowStatsInHeader &&
-            !isMobile &&
-            !isPrivate && (
-              <div className="flex-1 flex justify-center">
-                <StatsBar {...(props as Required<StatsBarProps>)} />
-              </div>
-            )}
+          {!isInstancePage && !isPrivate && (
+            <div className="flex min-w-0 flex-1 justify-center overflow-hidden">
+              <StatsBar {...(props as Required<StatsBarProps>)} />
+            </div>
+          )}
 
-          <div className="flex items-center space-x-2">
+          <div className="flex shrink-0 items-center space-x-2">
             {isMobile ? (
               <>
                 {!isInstancePage && (

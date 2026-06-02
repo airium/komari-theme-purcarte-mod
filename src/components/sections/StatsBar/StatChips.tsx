@@ -6,56 +6,34 @@ export const StatChip = memo(
   ({
     label,
     lines,
-    isLabelVertical,
-    isInHeader,
-    isMobile,
     textLeft,
+    className,
   }: {
     label: string;
     lines: ReactNode[];
-    isLabelVertical?: boolean;
-    isInHeader?: boolean;
-    isMobile: boolean;
     textLeft?: boolean;
+    className?: string;
   }) => {
-    if (isMobile || isInHeader) {
-      return (
-        <div
-          className={cn(
-            "flex shrink-0 bg-transition px-1.5 py-0.5 text-center items-center",
-            isLabelVertical ? "" : "flex-col"
-          )}>
-          <div
-            className={cn(
-              "text-xs font-semibold",
-              isMobile ? "" : "tracking-widest"
-            )}
-            style={
-              !isMobile && isLabelVertical ? { writingMode: "vertical-rl" } : {}
-            }>
+    return (
+      <div
+        className={cn(
+          "flex shrink-0 flex-col items-center bg-transition px-1.5 py-0.5 text-center text-accent-foreground",
+          className
+        )}>
+        {label && (
+          <div className="text-xs font-semibold tracking-widest leading-none">
             {label}
           </div>
-          <div
-            className={`text-xs font-semibold leading-tight ${
-              textLeft ? "text-left" : ""
-            }`}>
-            {lines.map((line, index) => (
-              <div key={index}>{line}</div>
-            ))}
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="w-full py-1">
-        <div className="flex flex-col gap-2 items-center">
-          <label>{label}</label>
-          <div className={`font-medium -mt-2 ${textLeft ? "text-left" : ""}`}>
-            {lines.map((line, index) => (
-              <div key={index}>{line}</div>
-            ))}
-          </div>
+        )}
+        <div
+          className={cn(
+            "text-xs font-semibold leading-tight whitespace-nowrap",
+            label && "mt-0.5",
+            textLeft && "text-left"
+          )}>
+          {lines.map((line, index) => (
+            <div key={index}>{line}</div>
+          ))}
         </div>
       </div>
     );
@@ -63,7 +41,7 @@ export const StatChip = memo(
 );
 
 export const CurrentTimeChip = memo(
-  ({ isInHeader, isMobile }: { isInHeader?: boolean; isMobile: boolean }) => {
+  ({ className }: { className?: string }) => {
     const [time, setTime] = useState(() => new Date());
     const { t } = useLocale();
 
@@ -77,8 +55,7 @@ export const CurrentTimeChip = memo(
         key="currentTime"
         label={t("statsBar.currentTime")}
         lines={[formatIsoTime(time)]}
-        isInHeader={isInHeader}
-        isMobile={isMobile}
+        className={className}
       />
     );
   }

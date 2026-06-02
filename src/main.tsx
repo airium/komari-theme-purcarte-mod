@@ -65,12 +65,10 @@ const AppRoutes = ({
     stats,
     selectedGroup,
     setSelectedGroup,
-    handleSort,
   } = useNodeListCommons(searchTerm);
   const statsBarProps: StatsBarProps = {
     stats,
     loading,
-    onSort: handleSort,
   };
 
   const homeViewportRef = useRef<HTMLDivElement | null>(null);
@@ -133,9 +131,7 @@ const AppRoutes = ({
                         filteredNodes={filteredNodes}
                         selectedGroup={selectedGroup}
                         setSelectedGroup={setSelectedGroup}
-                        stats={stats}
                         groups={groups}
-                        handleSort={handleSort}
                       />
                     </main>
                     <Footer isSettingsOpen={isSettingsOpen} ref={null} />

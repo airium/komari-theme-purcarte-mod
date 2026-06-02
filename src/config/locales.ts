@@ -134,7 +134,7 @@ export const defaultTexts = {
     latency: "Latency", // 延迟
     live: "Live", // 实时
     hours: "{count}h", // {count}小时
-    uptimeHours: "{count} hrs", // 运行时小时单位
+    uptimeHours: "{count} hr", // 运行时小时单位
     days: "{count}d", // {count}天
     optionLoad: "Load", // 负载
     optionPing: "Latency", // 延迟

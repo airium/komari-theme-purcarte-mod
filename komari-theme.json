@@ -167,27 +167,6 @@
                 "help": "启用后将在支持的 Komari 版本（>=1.0.7）优先使用 JSON-RPC2 API 获取数据，以提升兼容性和性能，若出现问题请关闭此选项"
             },
             {
-                "key": "isShowStatsInHeader",
-                "name": "是否在标题栏中显示统计信息",
-                "type": "switch",
-                "default": false,
-                "help": "启用后将在标题栏中显示统计信息，仅在大屏桌面端有效，当标题栏空间不足时将恢复原统计栏位置"
-            },
-            {
-                "key": "enableSortControl",
-                "name": "启用排序控制",
-                "type": "switch",
-                "default": false,
-                "help": "启用后在统计栏添加排序控制下拉菜单选项，分别对流量上下行和网速上下行进行升降排序"
-            },
-            {
-                "key": "isOfflineNodesBehind",
-                "name": "启用离线节点置后显示",
-                "type": "switch",
-                "default": false,
-                "help": "启用后离线节点将被自动置后显示"
-            },
-            {
                 "key": "defaultSelectedGroup",
                 "name": "默认选择展示分组",
                 "type": "string",

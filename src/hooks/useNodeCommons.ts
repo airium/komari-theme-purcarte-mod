@@ -3,15 +3,11 @@ import { formatPrice } from "@/utils";
 import { formatIsoDate } from "@/utils";
 import { formatLoadValue } from "@/utils";
 import type { NodeData } from "@/types/node";
-import type { RpcNodeStatus } from "@/types/rpc";
 import { useNodeData } from "@/contexts/NodeDataContext";
 import { useLiveData } from "@/contexts/LiveDataContext";
 import type { NodeDataContextType } from "@/contexts/NodeDataContext";
 import type { LiveDataContextType } from "@/contexts/LiveDataContext";
 import { useLocale, useAppConfig } from "@/config/hooks";
-
-type SortKey = "trafficUp" | "trafficDown" | "speedUp" | "speedDown" | null;
-type SortOrder = "asc" | "desc";
 
 export const useNodeListCommons = (searchTerm: string) => {
   const {
@@ -21,21 +17,10 @@ export const useNodeListCommons = (searchTerm: string) => {
   } = useNodeData() as NodeDataContextType;
   const { liveData } = useLiveData() as LiveDataContextType;
   const { t } = useLocale();
-  const { isOfflineNodesBehind, defaultSelectedGroup } = useAppConfig();
+  const { defaultSelectedGroup } = useAppConfig();
   const [selectedGroup, setSelectedGroup] = useState(
     defaultSelectedGroup || t("group.all")
   );
-  const [sortKey, setSortKey] = useState<SortKey>(null);
-  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
-
-  const handleSort = (key: SortKey) => {
-    if (sortKey === key) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortKey(key);
-      setSortOrder("desc");
-    }
-  };
 
   const combinedNodes = useMemo(() => {
     if (!staticNodes) return [];
@@ -54,7 +39,7 @@ export const useNodeListCommons = (searchTerm: string) => {
   );
 
   const filteredNodes = useMemo(() => {
-    let nodes = combinedNodes
+    return combinedNodes
       .filter(
         (node: NodeData & { stats?: any }) =>
           selectedGroup === t("group.all") || node.group === selectedGroup
@@ -62,49 +47,11 @@ export const useNodeListCommons = (searchTerm: string) => {
       .filter((node: NodeData) =>
         node.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
-
-    if (isOfflineNodesBehind || sortKey) {
-      nodes.sort((a, b) => {
-        if (isOfflineNodesBehind) {
-          const aOnline = a.stats?.online || false;
-          const bOnline = b.stats?.online || false;
-          if (aOnline !== bOnline) {
-            return aOnline ? -1 : 1;
-          }
-        }
-
-        if (sortKey) {
-          const sortMap: { [key in SortKey & string]: keyof RpcNodeStatus } = {
-            trafficUp: "net_total_up",
-            trafficDown: "net_total_down",
-            speedUp: "net_out",
-            speedDown: "net_in",
-          };
-          const statsKey = sortMap[sortKey];
-
-          const aValue = Number(a.stats?.[statsKey] || 0);
-          const bValue = Number(b.stats?.[statsKey] || 0);
-
-          if (sortOrder === "asc") {
-            return aValue - bValue;
-          } else {
-            return bValue - aValue;
-          }
-        }
-
-        return 0;
-      });
-    }
-
-    return nodes;
   }, [
     combinedNodes,
     selectedGroup,
     searchTerm,
-    sortKey,
-    sortOrder,
     t,
-    isOfflineNodesBehind,
   ]);
 
   const stats = useMemo(() => {
@@ -138,9 +85,6 @@ export const useNodeListCommons = (searchTerm: string) => {
     stats,
     selectedGroup,
     setSelectedGroup,
-    handleSort,
-    sortKey,
-    sortOrder,
   };
 };
 

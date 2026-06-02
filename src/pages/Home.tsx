@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { StatsBar } from "@/components/sections/StatsBar";
 import {
   NodeTable,
   NODE_TABLE_MAX_WIDTH_REM,
@@ -15,7 +14,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useIsMobile } from "@/hooks/useMobile";
 import { useLocale } from "@/config/hooks";
 
 interface HomePageProps {
@@ -24,9 +22,7 @@ interface HomePageProps {
   filteredNodes: (NodeData & { stats?: any })[];
   selectedGroup: string;
   setSelectedGroup: (group: string) => void;
-  stats: any;
   groups: string[];
-  handleSort: (key: any) => void;
 }
 
 const HomePage: React.FC<HomePageProps> = ({
@@ -35,15 +31,11 @@ const HomePage: React.FC<HomePageProps> = ({
   filteredNodes,
   selectedGroup,
   setSelectedGroup,
-  stats,
   groups,
-  handleSort,
 }) => {
   const { loading, error, refreshNodes } = useNodeData();
-  const { enableListItemProgressBar, isShowStatsInHeader } = useAppConfig();
+  const { enableListItemProgressBar } = useAppConfig();
   const { t } = useLocale();
-
-  const isMobile = useIsMobile();
 
   const hasSearchTerm = searchTerm.trim().length > 0;
 
@@ -53,15 +45,6 @@ const HomePage: React.FC<HomePageProps> = ({
 
   return (
     <div className="fade-in my-4">
-      {(!isShowStatsInHeader || isMobile) && (
-        <StatsBar
-          stats={stats}
-          loading={loading}
-          isShowStatsInHeader={isShowStatsInHeader}
-          onSort={handleSort}
-        />
-      )}
-
       <div
         className="box-border w-full mx-auto px-1 my-4"
         style={{ maxWidth: `min(${NODE_TABLE_MAX_WIDTH_REM}rem, var(--main-width))` }}>

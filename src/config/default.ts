@@ -20,9 +20,6 @@ export interface ConfigOptions {
   enableSearchButton: boolean; // 是否启用搜索按钮
   enableAdminButton: boolean; // 是否启用管理员按钮
   enableJsonRPC2Api: boolean; // 是否启用 JSON-RPC2 API 适配
-  isShowStatsInHeader: boolean; // 是否在标题栏中显示统计信息
-  enableSortControl: boolean; // 是否启用排序控制
-  isOfflineNodesBehind: boolean; // 是否启用离线节点置后显示
   defaultSelectedGroup: string; // 默认选择展示分组
   pingChartTimeInPreview: number; // 预览详情的延迟图表时间范围，单位为小时
   enableInstanceDetail: boolean; // 是否启用实例详情
@@ -57,9 +54,6 @@ export const DEFAULT_CONFIG: ConfigOptions = {
   enableSearchButton: true,
   enableAdminButton: true,
   enableJsonRPC2Api: false,
-  isShowStatsInHeader: false,
-  enableSortControl: false,
-  isOfflineNodesBehind: false,
   defaultSelectedGroup: "",
   pingChartTimeInPreview: 1,
   enableInstanceDetail: true,
