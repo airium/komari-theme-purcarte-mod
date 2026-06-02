@@ -2,9 +2,11 @@ import {
   cn,
   formatBytes,
   formatNetworkSpeedMbps,
+  formatOfflineHours,
   formatPercentage,
   formatPrice,
   formatUptime,
+  formatUptimeValue,
   getExpiryDaysLeftColor,
   getTrafficLimitTypeLabel,
   getNetworkSpeedColor,
@@ -521,6 +523,14 @@ const NodeTableRow = ({
     TABLE_COLUMN_INDEX.quota,
     columnWidthsRem
   );
+  const uptimeDisplay = stats ? formatUptimeValue(stats.uptime) : null;
+  const lastReportTime =
+    stats && typeof stats === "object"
+      ? ("time" in stats && typeof stats.time === "string" && stats.time) ||
+        ("updated_at" in stats && typeof stats.updated_at === "string" && stats.updated_at) ||
+        node.updated_at
+      : node.updated_at;
+  const offlineHours = formatOfflineHours(lastReportTime);
 
   return (
     <Card
@@ -593,14 +603,14 @@ const NodeTableRow = ({
         <div className={cn(TWO_LINE_CELL_CLASS, "text-right leading-tight h-[40px]")}>
           <div className="truncate">
             {isOnline && stats ? (
-              <span style={{ color: getUptimeHoursColor(stats.uptime / 3600) }}>
-                {t("instancePage.uptimeHours", { count: formatUptime(stats.uptime) })}
+              <span style={{ color: getUptimeHoursColor(uptimeDisplay?.hours ?? stats.uptime / 3600) }}>
+                {`${uptimeDisplay?.value ?? formatUptime(stats.uptime)} ${uptimeDisplay?.unit ?? "hr"}`}
               </span>
             ) : (
-              t("node.notAvailable")
+              <span className="text-red-500">{`${offlineHours} hr`}</span>
             )}
           </div>
-          <div></div>
+          <div className="truncate text-red-500">{isOnline ? "" : "OFFLINE"}</div>
         </div>
 
         <div className={cn(TWO_LINE_CELL_CLASS, "text-left leading-tight h-[40px]")}>

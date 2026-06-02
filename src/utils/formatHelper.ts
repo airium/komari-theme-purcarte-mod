@@ -343,6 +343,36 @@ export const formatUptime = (seconds: number) => {
   return formatSignificantDigits(hours, 3, "N/A");
 };
 
+export const formatUptimeValue = (
+  seconds: number,
+  monthThresholdHours = 720
+) => {
+  if (isNaN(seconds) || seconds < 0) {
+    return { value: "N/A", unit: "hr", hours: Number.NaN };
+  }
+
+  const hours = seconds / 3600;
+  const useMonths = hours > monthThresholdHours;
+  const displayValue = useMonths ? hours / monthThresholdHours : hours;
+
+  return {
+    value: formatSignificantDigits(displayValue, 3, "N/A"),
+    unit: useMonths ? "mo" : "hr",
+    hours,
+  };
+};
+
+export const formatOfflineHours = (updatedAt: DateInput, now = Date.now()) => {
+  const date = parseDateInput(updatedAt);
+
+  if (!date) {
+    return "N/A";
+  }
+
+  const diffMs = Math.max(now - date.getTime(), 0);
+  return formatSignificantDigits(diffMs / (1000 * 60 * 60), 3, "N/A");
+};
+
 export interface PriceFormatLabels {
   free?: string;
   billingCycleDays?: string;
