@@ -148,7 +148,6 @@ export const Header = forwardRef<HTMLElement, HeaderProps>((props, ref) => {
   const location = useLocation();
   const isInstancePage = location.pathname.startsWith("/instance");
   const {
-    selectedHeaderStyle,
     enableTitle,
     titleText,
     enableLogo,
@@ -168,10 +167,7 @@ export const Header = forwardRef<HTMLElement, HeaderProps>((props, ref) => {
   return (
     <header
       ref={ref}
-      className={cn(
-        selectedHeaderStyle === "levitation" ? "fixed" : "sticky",
-        "top-0 left-0 right-0 flex z-10"
-      )}
+      className={cn("fixed top-0 left-0 right-0 flex z-10")}
       style={{
         right: isSettingsOpen && !isMobile ? "var(--setting-width)" : "0",
       }}>

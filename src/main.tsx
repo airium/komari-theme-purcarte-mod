@@ -49,7 +49,6 @@ const AppRoutes = ({
   setIsSettingsOpen,
   headerRef,
   headerHeight,
-  footerHeight,
 }: {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
@@ -57,7 +56,6 @@ const AppRoutes = ({
   setIsSettingsOpen: (isOpen: boolean) => void;
   headerRef: React.RefObject<HTMLElement | null>;
   headerHeight: number;
-  footerHeight: number;
 }) => {
   const location = useLocation();
   const {
@@ -69,8 +67,6 @@ const AppRoutes = ({
     setSelectedGroup,
     handleSort,
   } = useNodeListCommons(searchTerm);
-  const { selectedHeaderStyle, selectedFooterStyle } = useAppConfig();
-
   const statsBarProps: StatsBarProps = {
     stats,
     loading,
@@ -129,14 +125,7 @@ const AppRoutes = ({
                     <main
                       className="w-(--main-width) mx-auto h-full flex-grow"
                       style={{
-                        paddingTop:
-                          selectedHeaderStyle === "levitation"
-                            ? headerHeight
-                            : 0,
-                        paddingBottom:
-                          selectedFooterStyle === "levitation"
-                            ? footerHeight
-                            : 0,
+                        paddingTop: headerHeight,
                       }}>
                       <HomePage
                         searchTerm={searchTerm}
@@ -149,9 +138,7 @@ const AppRoutes = ({
                         handleSort={handleSort}
                       />
                     </main>
-                    {selectedFooterStyle === "followContent" && (
-                      <Footer isSettingsOpen={isSettingsOpen} ref={null} />
-                    )}
+                    <Footer isSettingsOpen={isSettingsOpen} ref={null} />
                   </div>
                 </ScrollArea>
               }
@@ -166,20 +153,11 @@ const AppRoutes = ({
                     <main
                       className="w-(--main-width) h-full mx-auto flex-1"
                       style={{
-                        paddingTop:
-                          selectedHeaderStyle === "levitation"
-                            ? headerHeight
-                            : 0,
-                        paddingBottom:
-                          selectedFooterStyle === "levitation"
-                            ? footerHeight
-                            : 0,
+                        paddingTop: headerHeight,
                       }}>
                       <InstancePage />
                     </main>
-                    {selectedFooterStyle === "followContent" && (
-                      <Footer isSettingsOpen={isSettingsOpen} ref={null} />
-                    )}
+                    <Footer isSettingsOpen={isSettingsOpen} ref={null} />
                   </div>
                 </ScrollArea>
               }
@@ -191,9 +169,7 @@ const AppRoutes = ({
                   <main className="w-(--main-width) h-full mx-auto flex-1">
                     <NotFoundPage />
                   </main>
-                  {selectedFooterStyle === "followContent" && (
-                    <Footer isSettingsOpen={isSettingsOpen} ref={null} />
-                  )}
+                  <Footer isSettingsOpen={isSettingsOpen} ref={null} />
                 </div>
               }
             />
@@ -205,13 +181,11 @@ const AppRoutes = ({
 };
 
 export const AppContent = () => {
-  const { siteStatus, mainWidth, selectedFooterStyle } = useAppConfig();
+  const { siteStatus, mainWidth } = useAppConfig();
   const { color } = useTheme();
   const [searchTerm, setSearchTerm] = useState("");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const isMobile = useIsMobile();
-  const footerRef = useRef<HTMLElement | null>(null);
-  const [footerHeight, setFooterHeight] = useState(0);
   const headerRef = useRef<HTMLElement | null>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
 
@@ -224,21 +198,6 @@ export const AppContent = () => {
     });
 
     resizeObserver.observe(header);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, []);
-
-  useEffect(() => {
-    const footer = footerRef.current;
-    if (!footer) return;
-
-    const resizeObserver = new ResizeObserver(() => {
-      setFooterHeight(footer.offsetHeight);
-    });
-
-    resizeObserver.observe(footer);
 
     return () => {
       resizeObserver.disconnect();
@@ -296,9 +255,7 @@ export const AppContent = () => {
                     <main className="w-(--main-width) h-full mx-auto flex-1">
                       <PrivatePage />
                     </main>
-                    {selectedFooterStyle === "followContent" && (
-                      <Footer isSettingsOpen={isSettingsOpen} ref={null} />
-                    )}
+                    <Footer isSettingsOpen={isSettingsOpen} ref={null} />
                   </div>
                 </Suspense>
               </>
@@ -310,13 +267,8 @@ export const AppContent = () => {
                 setIsSettingsOpen={setIsSettingsOpen}
                 headerRef={headerRef}
                 headerHeight={headerHeight}
-                footerHeight={footerHeight}
               />
             )}
-            {selectedFooterStyle !== "followContent" &&
-              selectedFooterStyle !== "hidden" && (
-                <Footer ref={footerRef} isSettingsOpen={isSettingsOpen} />
-              )}
           </div>
           <SettingsPanel
             isOpen={isSettingsOpen}

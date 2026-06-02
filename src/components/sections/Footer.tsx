@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import { useAppConfig, useLocale } from "@/config/hooks";
+import { useLocale } from "@/config/hooks";
 import { Card } from "../ui/card";
 import { cn } from "@/utils";
 import { useIsMobile } from "@/hooks/useMobile";
@@ -11,25 +11,16 @@ const Footer = forwardRef<
   }
 >(({ isSettingsOpen }, ref) => {
   const { t } = useLocale();
-  const { selectedFooterStyle } = useAppConfig();
   const isMobile = useIsMobile();
   return (
     <footer
       ref={ref}
-      className={cn(
-        selectedFooterStyle === "levitation"
-          ? "fixed"
-          : selectedFooterStyle === "followContent"
-          ? "mb-4 w-(--main-width) mx-auto"
-          : "",
-        "bottom-0 left-0 right-0 flex z-10"
-      )}
+      className={cn("mb-4 w-(--main-width) mx-auto bottom-0 left-0 right-0 flex z-10")}
       style={{
         right: isSettingsOpen && !isMobile ? "var(--setting-width)" : "0",
       }}>
       <Card
         className={cn(
-          selectedFooterStyle !== "followContent" ? "rounded-none" : "",
           "p-2 w-full flex items-center justify-center inset-shadow-sm inset-shadow-(color:--accent-a4)"
         )}>
         <p className="flex justify-center text-sm text-secondary-foreground theme-text-shadow whitespace-pre">

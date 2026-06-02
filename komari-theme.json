@@ -106,22 +106,6 @@
                 "help": "设置默认主题颜色，颜色对照请参考：https://www.radix-ui.com/themes/docs/theme/color"
             },
             {
-                "key": "selectedHeaderStyle",
-                "name": "标题栏样式",
-                "type": "select",
-                "options": "fixed,levitation",
-                "default": "fixed",
-                "help": "设置标题栏样式为 fixed（固定）或 levitation（悬浮）"
-            },
-            {
-                "key": "selectedFooterStyle",
-                "name": "底栏样式",
-                "type": "select",
-                "options": "fixed,levitation,followContent,hidden",
-                "default": "fixed",
-                "help": "设置底栏样式为 fixed（固定）, levitation（悬浮）, followContent（跟随内容）或 hidden（隐藏）"
-            },
-            {
                 "name": "内容设置",
                 "type": "title"
             },
@@ -190,18 +174,11 @@
                 "help": "启用后将在标题栏中显示统计信息，仅在大屏桌面端有效，当标题栏空间不足时将恢复原统计栏位置"
             },
             {
-                "key": "enableStatsBar",
-                "name": "启用统计栏",
-                "type": "switch",
-                "default": true,
-                "help": "启用后默认显示统计栏"
-            },
-            {
                 "key": "enableSortControl",
                 "name": "启用排序控制",
                 "type": "switch",
                 "default": false,
-                "help": "启用后在统计栏添加排序控制下拉菜单选项，分别对流量上下行和网速上下行进行升降排序，仅在启用统计栏时有效"
+                "help": "启用后在统计栏添加排序控制下拉菜单选项，分别对流量上下行和网速上下行进行升降排序"
             },
             {
                 "key": "isOfflineNodesBehind",

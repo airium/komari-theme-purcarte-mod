@@ -13,17 +13,14 @@ export interface ConfigOptions {
   enableTransparentTags: boolean; // 是否启用标签透明背景
   tagDefaultColorList: string; // 标签默认颜色列表
   selectThemeColor: ColorType; // 默认主题颜色
-  selectedHeaderStyle: HeaderStyle; // 标题栏样式
   enableLogo: boolean; // 是否启用Logo
   logoUrl: string; // Logo图片URL
   enableTitle: boolean; // 是否启用标题
   titleText: string; // 标题文本
   enableSearchButton: boolean; // 是否启用搜索按钮
   enableAdminButton: boolean; // 是否启用管理员按钮
-  selectedFooterStyle: FooterStyle; // 页脚样式
   enableJsonRPC2Api: boolean; // 是否启用 JSON-RPC2 API 适配
   isShowStatsInHeader: boolean; // 是否在标题栏中显示统计信息
-  enableStatsBar: boolean; // 是否启用统计栏
   enableSortControl: boolean; // 是否启用排序控制
   isOfflineNodesBehind: boolean; // 是否启用离线节点置后显示
   defaultSelectedGroup: string; // 默认选择展示分组
@@ -53,17 +50,14 @@ export const DEFAULT_CONFIG: ConfigOptions = {
   tagDefaultColorList:
     "ruby,gray,gold,bronze,brown,yellow,amber,orange,tomato,red",
   selectThemeColor: "violet",
-  selectedHeaderStyle: "fixed",
   enableLogo: false,
   logoUrl: "/assets/logo.png",
   enableTitle: true,
   titleText: "Komari",
   enableSearchButton: true,
   enableAdminButton: true,
-  selectedFooterStyle: "fixed",
   enableJsonRPC2Api: false,
   isShowStatsInHeader: false,
-  enableStatsBar: true,
   enableSortControl: false,
   isOfflineNodesBehind: false,
   defaultSelectedGroup: "",
@@ -139,5 +133,3 @@ export type SiteStatus =
   | "private-authenticated"
   | "authenticated";
 
-export type HeaderStyle = "fixed" | "levitation";
-export type FooterStyle = "fixed" | "levitation" | "followContent" | "hidden";

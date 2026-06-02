@@ -40,11 +40,7 @@ const HomePage: React.FC<HomePageProps> = ({
   handleSort,
 }) => {
   const { loading, error, refreshNodes } = useNodeData();
-  const {
-    enableStatsBar,
-    enableListItemProgressBar,
-    isShowStatsInHeader,
-  } = useAppConfig();
+  const { enableListItemProgressBar, isShowStatsInHeader } = useAppConfig();
   const { t } = useLocale();
 
   const isMobile = useIsMobile();
@@ -57,7 +53,7 @@ const HomePage: React.FC<HomePageProps> = ({
 
   return (
     <div className="fade-in my-4">
-      {enableStatsBar && (!isShowStatsInHeader || isMobile) && (
+      {(!isShowStatsInHeader || isMobile) && (
         <StatsBar
           stats={stats}
           loading={loading}
