@@ -1,6 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { StatsBar } from "@/components/sections/StatsBar";
-import { NodeTable } from "@/components/sections/NodeTable";
+import {
+  NodeTable,
+  NODE_TABLE_MAX_WIDTH_REM,
+} from "@/components/sections/NodeTable";
 import Loading from "@/components/loading";
 import type { NodeData } from "@/types/node";
 import { useNodeData } from "@/contexts/NodeDataContext";
@@ -38,11 +41,9 @@ const HomePage: React.FC<HomePageProps> = ({
 }) => {
   const { loading, error, refreshNodes } = useNodeData();
   const {
-    enableGroupedBar,
     enableStatsBar,
     enableListItemProgressBar,
     isShowStatsInHeader,
-    mergeGroupsWithStats,
   } = useAppConfig();
   const { t } = useLocale();
 
@@ -61,28 +62,31 @@ const HomePage: React.FC<HomePageProps> = ({
           stats={stats}
           loading={loading}
           isShowStatsInHeader={isShowStatsInHeader}
-          enableGroupedBar={enableGroupedBar}
-          groups={groups}
-          selectedGroup={selectedGroup}
-          onSelectGroup={setSelectedGroup}
           onSort={handleSort}
         />
       )}
 
-      {enableGroupedBar && !mergeGroupsWithStats && (
-        <div className="flex purcarte-blur theme-card-style overflow-auto whitespace-nowrap overflow-x-auto items-center min-w-[300px] text-primary space-x-4 px-4 my-4">
-          <span>{t("group.name")}</span>
-          {groups?.map((group: string) => (
-            <Button
-              key={group}
-              variant={selectedGroup === group ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setSelectedGroup?.(group)}>
-              {group}
-            </Button>
-          ))}
-        </div>
-      )}
+      <div
+        className="box-border w-full mx-auto px-1 my-4"
+        style={{ maxWidth: `min(${NODE_TABLE_MAX_WIDTH_REM}rem, var(--main-width))` }}>
+        <Card className="theme-card-style overflow-x-auto text-primary">
+          <div className="flex min-w-max items-center gap-1 whitespace-nowrap px-1.5 py-1">
+            <span className="shrink-0 text-xs text-secondary-foreground">
+              {t("group.name")}
+            </span>
+            {groups?.map((group: string) => (
+              <Button
+                key={group}
+                variant={selectedGroup === group ? "secondary" : "ghost"}
+                size="sm"
+                className="h-6 rounded-full px-1.5 text-[11px] font-medium"
+                onClick={() => setSelectedGroup?.(group)}>
+                {group}
+              </Button>
+            ))}
+          </div>
+        </Card>
+      </div>
 
       <div className="space-y-4 -mx-2 -mb-2">
         {filteredNodes.length > 0 ? (

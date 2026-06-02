@@ -10,15 +10,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { Layers } from "lucide-react";
 import { cn } from "@/utils";
-import type { StatsBarProps } from "./types";
 import { useLocale } from "@/config/hooks";
+
+interface GroupSelectorProps {
+  groups?: string[];
+  selectedGroup?: string;
+  onSelectGroup?: (group: string) => void;
+}
 
 export const GroupSelector = memo(
   ({
     groups,
     selectedGroup,
     onSelectGroup,
-  }: Pick<StatsBarProps, "groups" | "selectedGroup" | "onSelectGroup">) => {
+  }: GroupSelectorProps) => {
     const { t } = useLocale();
     if (!groups?.length || !onSelectGroup) return null;
 

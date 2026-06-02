@@ -190,13 +190,6 @@
                 "help": "启用后将在标题栏中显示统计信息，仅在大屏桌面端有效，当标题栏空间不足时将恢复原统计栏位置"
             },
             {
-                "key": "mergeGroupsWithStats",
-                "name": "合并分组栏与统计栏",
-                "type": "switch",
-                "default": false,
-                "help": "启用后分组栏将合并到统计栏中，并以下拉菜单形式展示"
-            },
-            {
                 "key": "enableStatsBar",
                 "name": "启用统计栏",
                 "type": "switch",
@@ -216,13 +209,6 @@
                 "type": "switch",
                 "default": false,
                 "help": "启用后离线节点将被自动置后显示"
-            },
-            {
-                "key": "enableGroupedBar",
-                "name": "启用分组栏",
-                "type": "switch",
-                "default": true,
-                "help": "启用后默认显示分组栏"
             },
             {
                 "key": "defaultSelectedGroup",

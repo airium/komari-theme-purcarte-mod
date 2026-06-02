@@ -69,16 +69,11 @@ const AppRoutes = ({
     setSelectedGroup,
     handleSort,
   } = useNodeListCommons(searchTerm);
-  const { enableGroupedBar, selectedHeaderStyle, selectedFooterStyle } =
-    useAppConfig();
+  const { selectedHeaderStyle, selectedFooterStyle } = useAppConfig();
 
   const statsBarProps: StatsBarProps = {
     stats,
     loading,
-    enableGroupedBar,
-    groups,
-    selectedGroup,
-    onSelectGroup: setSelectedGroup,
     onSort: handleSort,
   };
 

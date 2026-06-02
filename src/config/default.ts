@@ -23,11 +23,9 @@ export interface ConfigOptions {
   selectedFooterStyle: FooterStyle; // 页脚样式
   enableJsonRPC2Api: boolean; // 是否启用 JSON-RPC2 API 适配
   isShowStatsInHeader: boolean; // 是否在标题栏中显示统计信息
-  mergeGroupsWithStats: boolean; // 是否在统计栏中合并分组
   enableStatsBar: boolean; // 是否启用统计栏
   enableSortControl: boolean; // 是否启用排序控制
   isOfflineNodesBehind: boolean; // 是否启用离线节点置后显示
-  enableGroupedBar: boolean; // 是否启用分组栏
   defaultSelectedGroup: string; // 默认选择展示分组
   pingChartTimeInPreview: number; // 预览详情的延迟图表时间范围，单位为小时
   enableInstanceDetail: boolean; // 是否启用实例详情
@@ -65,11 +63,9 @@ export const DEFAULT_CONFIG: ConfigOptions = {
   selectedFooterStyle: "fixed",
   enableJsonRPC2Api: false,
   isShowStatsInHeader: false,
-  mergeGroupsWithStats: false,
   enableStatsBar: true,
   enableSortControl: false,
   isOfflineNodesBehind: false,
-  enableGroupedBar: true,
   defaultSelectedGroup: "",
   pingChartTimeInPreview: 1,
   enableInstanceDetail: true,

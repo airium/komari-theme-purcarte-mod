@@ -8,7 +8,6 @@ import {
 import { useAppConfig } from "@/config";
 import { useIsMobile } from "@/hooks/useMobile";
 import { CurrentTimeChip, StatChip } from "./StatChips";
-import { GroupSelector } from "./GroupSelector";
 import { SortToggleMenu } from "./SortToggleMenu";
 import { useLocale } from "@/config/hooks";
 import type { StatsBarProps, SortKey } from "./types";
@@ -27,9 +26,6 @@ export const StatsBar = (props: StatsBarProps) => {
   const {
     stats,
     loading,
-    groups,
-    selectedGroup,
-    onSelectGroup,
     onSort: onSortProp,
     sortKey: sortKeyProp,
     sortDirection: sortDirectionProp,
@@ -65,8 +61,6 @@ export const StatsBar = (props: StatsBarProps) => {
 
   const {
     isShowStatsInHeader,
-    mergeGroupsWithStats,
-    enableGroupedBar,
     enableSortControl,
   } = useAppConfig();
   const isMobile = useIsMobile();
@@ -133,13 +127,6 @@ export const StatsBar = (props: StatsBarProps) => {
   if (isShowStatsInHeader && !isMobile) {
     return (
       <div className="flex items-center gap-2">
-        {enableGroupedBar && mergeGroupsWithStats && (
-          <GroupSelector
-            groups={groups}
-            selectedGroup={selectedGroup}
-            onSelectGroup={onSelectGroup}
-          />
-        )}
         <div className="flex items-center gap-1.5">
           <CurrentTimeChip isInHeader={true} isMobile={isMobile} />
           {resolvedStats.map(({ key, ...rest }) => (
@@ -166,8 +153,7 @@ export const StatsBar = (props: StatsBarProps) => {
     if (!isMobile) {
       return "repeat(auto-fit, minmax(100px, 1fr))";
     }
-    const visibleCount =
-      resolvedStats.length + 1 + (enableGroupedBar && mergeGroupsWithStats ? 1 : 0);
+    const visibleCount = resolvedStats.length + 1;
 
     return visibleCount >= 5 ? "repeat(3, 1fr)" : "repeat(2, 1fr)";
   };
@@ -184,16 +170,6 @@ export const StatsBar = (props: StatsBarProps) => {
           gridTemplateColumns: getGridTemplateColumns(),
           gridAutoRows: "min-content",
         }}>
-        {enableGroupedBar && mergeGroupsWithStats && (
-          <div className="flex flex-col items-center">
-            <GroupSelector
-              groups={groups}
-              selectedGroup={selectedGroup}
-              onSelectGroup={onSelectGroup}
-            />
-          </div>
-        )}
-
         <CurrentTimeChip isMobile={isMobile} />
         {resolvedStats.map(({ key, ...rest }) => (
           <StatChip key={key} {...rest} isMobile={isMobile} />
