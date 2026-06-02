@@ -24,32 +24,129 @@ import Flag from "./Flag";
 import { Tag } from "../ui/tag";
 import { useNodeCommons } from "@/hooks/useNodeCommons";
 import { ProgressBar } from "../ui/progress-bar";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Instance from "@/pages/instance/Instance";
 import PingChart from "@/pages/instance/PingChart";
 import { useAppConfig } from "@/config";
 import { useLocale } from "@/config/hooks";
 import { Card } from "../ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import type * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 
 interface NodeTableProps {
   nodes: NodeData[];
   enableListItemProgressBar: boolean;
 }
 
-const TABLE_COLUMN_TEMPLATE = [
-  "2rem",
-  "minmax(7rem, 1fr)",
-  "minmax(0rem, 12fr)",
-  "minmax(5rem, 1fr)",
-  "minmax(4rem, 1fr)",
-  "minmax(11rem, 2fr)",
-  "minmax(9rem, 2fr)",
-  "minmax(9rem, 2fr)",
-  "minmax(5rem, 1fr)",
-  "minmax(4rem, 1fr)",
-  "minmax(11rem, 1fr)",
-].join(" ");
+interface TableColumnDefinition {
+  minRem: number;
+  maxRem: number;
+  weight: number;
+}
+
+// Native CSS Grid cannot combine a hard min, hard max, and weighted fr growth
+// for the same track, so the table resolves exact pixel widths from metadata.
+const TABLE_COLUMNS: TableColumnDefinition[] = [
+  { minRem: 1, maxRem: 2, weight: 1 },   // #
+  { minRem: 7, maxRem: 10, weight: 1 },  // name
+  { minRem: 0, maxRem: 20, weight: 10 }, // tags
+  { minRem: 0, maxRem: 6, weight: 10 },   // expire
+  { minRem: 4, maxRem: 5, weight: 1 },   // uptime
+  { minRem: 4, maxRem: 11, weight: 2 },  // cpu
+  { minRem: 4, maxRem: 9, weight: 2 },   // ram
+  { minRem: 4, maxRem: 9, weight: 2 },   // stor
+  { minRem: 5, maxRem: 6, weight: 1 },   // speed
+  { minRem: 4, maxRem: 5, weight: 1 },   // traffic
+  { minRem: 4, maxRem: 11, weight: 2 },  // quota
+];
+
+const TABLE_COLUMN_TEMPLATE = TABLE_COLUMNS.map(
+  (column) => `${column.minRem}rem`
+).join(" ");
+
+const TABLE_TRACK_MIN_WIDTH_REM = TABLE_COLUMNS.reduce(
+  (total, column) => total + column.minRem,
+  0
+);
+
+// Keep these in sync with `px-1`, `gap-x-1`, `p-1`, and the 1px Card border.
+const TABLE_WRAPPER_PADDING_X_REM = 0.5;
+const TABLE_CARD_PADDING_X_REM = 0.5;
+const TABLE_CARD_BORDER_X_REM = 0.125;
+const TABLE_COLUMN_GAP_REM = 0.25;
+const TABLE_NON_TRACK_WIDTH_REM =
+  TABLE_WRAPPER_PADDING_X_REM +
+  TABLE_CARD_PADDING_X_REM +
+  TABLE_CARD_BORDER_X_REM +
+  (TABLE_COLUMNS.length - 1) * TABLE_COLUMN_GAP_REM;
+
+const TABLE_MIN_WIDTH_REM =
+  TABLE_TRACK_MIN_WIDTH_REM + TABLE_NON_TRACK_WIDTH_REM;
+
+const getRootFontSize = () => {
+  if (typeof window === "undefined") {
+    return 16;
+  }
+
+  const fontSize = Number.parseFloat(
+    window.getComputedStyle(document.documentElement).fontSize
+  );
+
+  return Number.isFinite(fontSize) && fontSize > 0 ? fontSize : 16;
+};
+
+const buildTableColumnTemplate = (availableWidthPx: number) => {
+  const rootFontSize = getRootFontSize();
+  const availableTrackWidthPx = Math.max(
+    availableWidthPx - TABLE_NON_TRACK_WIDTH_REM * rootFontSize,
+    0
+  );
+  const columns = TABLE_COLUMNS.map((column) => ({
+    currentWidthPx: column.minRem * rootFontSize,
+    maxWidthPx: column.maxRem * rootFontSize,
+    weight: column.weight,
+  }));
+
+  let remainingWidthPx = Math.max(
+    availableTrackWidthPx -
+      columns.reduce((total, column) => total + column.currentWidthPx, 0),
+    0
+  );
+  let growableColumns = columns.filter(
+    (column) => column.weight > 0 && column.maxWidthPx > column.currentWidthPx
+  );
+
+  while (remainingWidthPx > 0.5 && growableColumns.length > 0) {
+    const totalWeight = growableColumns.reduce(
+      (total, column) => total + column.weight,
+      0
+    );
+
+    let distributedWidthPx = 0;
+
+    for (const column of growableColumns) {
+      const weightedSharePx = (remainingWidthPx * column.weight) / totalWeight;
+      const appliedWidthPx = Math.min(
+        weightedSharePx,
+        column.maxWidthPx - column.currentWidthPx
+      );
+
+      column.currentWidthPx += appliedWidthPx;
+      distributedWidthPx += appliedWidthPx;
+    }
+
+    if (distributedWidthPx <= 0.5) {
+      break;
+    }
+
+    remainingWidthPx -= distributedWidthPx;
+    growableColumns = growableColumns.filter(
+      (column) => column.maxWidthPx - column.currentWidthPx > 0.5
+    );
+  }
+
+  return columns.map((column) => `${column.currentWidthPx.toFixed(2)}px`).join(" ");
+};
 
 const TWO_LINE_CELL_CLASS = "min-w-0 h-9 grid grid-rows-2 items-center";
 
@@ -58,18 +155,71 @@ export const NodeTable = ({
   enableListItemProgressBar,
 }: NodeTableProps) => {
   const { t } = useLocale();
+  const viewportRef =
+    useRef<React.ElementRef<typeof ScrollAreaPrimitive.Viewport>>(null);
+  const [gridContentWidth, setGridContentWidth] = useState<number | null>(null);
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+
+    if (!viewport) {
+      return;
+    }
+
+    const updateWidth = (nextWidth: number) => {
+      setGridContentWidth((currentWidth) =>
+        currentWidth !== nextWidth ? nextWidth : currentWidth
+      );
+    };
+
+    const readContentWidth = () => {
+      updateWidth(Math.max(viewport.clientWidth, 0));
+    };
+
+    readContentWidth();
+
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", readContentWidth);
+      return () => window.removeEventListener("resize", readContentWidth);
+    }
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+
+      if (!entry) {
+        return;
+      }
+
+      updateWidth(Math.max(entry.contentRect.width, 0));
+    });
+
+    observer.observe(viewport);
+
+    return () => observer.disconnect();
+  }, []);
+
+  const columnTemplate = useMemo(() => {
+    if (!gridContentWidth) {
+      return TABLE_COLUMN_TEMPLATE;
+    }
+
+    return buildTableColumnTemplate(gridContentWidth);
+  }, [gridContentWidth]);
 
   return (
-    <ScrollArea className="w-full" showHorizontalScrollbar>
-      <div className="min-w-[1000px] px-1 pb-1">
+    <ScrollArea
+      className="w-full"
+      showHorizontalScrollbar
+      viewportRef={viewportRef}>
+      <div className="px-1 pb-1" style={{ minWidth: `${TABLE_MIN_WIDTH_REM}rem` }}>
         <div className="space-y-0.5">
           <Card
             className="theme-card-style text-primary font-semibold grid gap-x-1 gap-y-1 p-1 items-center text-xs"
-            style={{ gridTemplateColumns: TABLE_COLUMN_TEMPLATE }}>
+            style={{ gridTemplateColumns: columnTemplate }}>
             <div className="text-center"></div>
             <div className="text-left">{t("node.name")}</div>
             <div className="text-left truncate rt-r-min-w-0 min-w-0">{t("node.tags")}</div>
-            <div className="text-right">{t("node.expiredAt")}</div>
+            <div className="text-right truncate rt-r-min-w-0 min-w-0">{t("node.expiredAt")}</div>
             <div className="text-right">{t("node.uptime")}</div>
             <div className="text-left flex items-center gap-1">
               <CpuIcon className="size-4 text-blue-600" />
@@ -89,6 +239,7 @@ export const NodeTable = ({
           </Card>
           {nodes.map((node) => (
             <NodeTableRow
+              columnTemplate={columnTemplate}
               key={node.uuid}
               node={node}
               enableListItemProgressBar={enableListItemProgressBar}
@@ -101,11 +252,16 @@ export const NodeTable = ({
 };
 
 interface NodeTableRowProps {
+  columnTemplate: string;
   node: NodeData;
   enableListItemProgressBar: boolean;
 }
 
-const NodeTableRow = ({ node, enableListItemProgressBar }: NodeTableRowProps) => {
+const NodeTableRow = ({
+  columnTemplate,
+  node,
+  enableListItemProgressBar,
+}: NodeTableRowProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [shouldRenderChart, setShouldRenderChart] = useState(false);
 
@@ -257,7 +413,7 @@ const NodeTableRow = ({ node, enableListItemProgressBar }: NodeTableRowProps) =>
       <div
         onClick={() => setIsOpen(!isOpen)}
         className="grid gap-x-1 gap-y-1 p-1 min-h-[40px] text-primary transition-colors duration-200 cursor-pointer items-center text-xs"
-        style={{ gridTemplateColumns: TABLE_COLUMN_TEMPLATE }}>
+        style={{ gridTemplateColumns: columnTemplate }}>
         <div className="flex justify-center pt-0.5">
           <ChevronRight
             className={`transition-transform size-4 ${isOpen ? "rotate-90" : ""}`}
