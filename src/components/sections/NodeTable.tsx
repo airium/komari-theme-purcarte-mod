@@ -64,11 +64,11 @@ export const NodeTable = ({
       <div className="min-w-[1000px] px-1 pb-1">
         <div className="space-y-0.5">
           <Card
-            className="theme-card-style text-primary font-semibold grid gap-x-2 gap-y-1 p-1.5 items-center text-xs"
+            className="theme-card-style text-primary font-semibold grid gap-x-1 gap-y-1 p-1 items-center text-xs"
             style={{ gridTemplateColumns: TABLE_COLUMN_TEMPLATE }}>
-            <div className="text-center">#</div>
+            <div className="text-center"></div>
             <div className="text-left">{t("node.name")}</div>
-            <div className="text-left truncate">{t("node.tags")}</div>
+            <div className="text-left truncate rt-r-min-w-0 min-w-0">{t("node.tags")}</div>
             <div className="text-right">{t("node.expiredAt")}</div>
             <div className="text-right">{t("node.uptime")}</div>
             <div className="text-left flex items-center gap-1">
@@ -256,7 +256,7 @@ const NodeTableRow = ({ node, enableListItemProgressBar }: NodeTableRowProps) =>
       )}>
       <div
         onClick={() => setIsOpen(!isOpen)}
-        className="grid gap-x-2 gap-y-1 p-1.5 text-primary transition-colors duration-200 cursor-pointer items-center text-xs"
+        className="grid gap-x-1 gap-y-1 p-1 min-h-[40px] text-primary transition-colors duration-200 cursor-pointer items-center text-xs"
         style={{ gridTemplateColumns: TABLE_COLUMN_TEMPLATE }}>
         <div className="flex justify-center pt-0.5">
           <ChevronRight
@@ -264,7 +264,7 @@ const NodeTableRow = ({ node, enableListItemProgressBar }: NodeTableRowProps) =>
           />
         </div>
 
-        <div className="min-w-0 text-left leading-tight">
+        <div className={cn(TWO_LINE_CELL_CLASS, "text-left leading-tight h-[40px]")}>
           <Link
             to={`/instance/${node.uuid}`}
             onClick={(e) => e.stopPropagation()}
@@ -287,11 +287,11 @@ const NodeTableRow = ({ node, enableListItemProgressBar }: NodeTableRowProps) =>
           </div>
         </div>
 
-        <div className="min-w-0 text-left">
+        <div className="min-w-0 text-left h-[40px]">
           {customTags.length > 0 ? (
-            <div className="max-h-8 overflow-hidden">
+            <div className="max-h-[40px] overflow-hidden">
               <Tag
-                className="!gap-0.5 origin-top-left scale-90 [&_.rt-Badge]:!text-[10px] [&_[data-accent-color]]:!text-[10px]"
+                className="!gap-0.5 origin-top-left scale-95 [&_.rt-Badge]:!text-[10px] [&_[data-accent-color]]:!text-[10px]"
                 tags={customTags}
               />
             </div>
@@ -300,7 +300,7 @@ const NodeTableRow = ({ node, enableListItemProgressBar }: NodeTableRowProps) =>
           )}
         </div>
 
-        <div className={cn(TWO_LINE_CELL_CLASS, "text-right leading-tight")}>
+        <div className={cn(TWO_LINE_CELL_CLASS, "text-right leading-tight h-[40px]")}>
           <div className="truncate">{expired_at}</div>
           <div className="truncate text-secondary-foreground">
             {remainingInfo.text ? (
@@ -311,7 +311,7 @@ const NodeTableRow = ({ node, enableListItemProgressBar }: NodeTableRowProps) =>
           </div>
         </div>
 
-        <div className={cn(TWO_LINE_CELL_CLASS, "text-right leading-tight")}>
+        <div className={cn(TWO_LINE_CELL_CLASS, "text-right leading-tight h-[40px]")}>
           <div className="truncate">
             {isOnline && stats ? (
               <span style={{ color: getUptimeHoursColor(stats.uptime / 3600) }}>
@@ -324,14 +324,14 @@ const NodeTableRow = ({ node, enableListItemProgressBar }: NodeTableRowProps) =>
           <div></div>
         </div>
 
-        <div className={cn(TWO_LINE_CELL_CLASS, "text-left leading-tight")}>
+        <div className={cn(TWO_LINE_CELL_CLASS, "text-left leading-tight h-[40px]")}>
           <div className="truncate">{cpuSummary}</div>
           <div className="flex items-center h-2">
             {enableListItemProgressBar ? <ProgressBar value={cpuUsage} h="h-2" /> : null}
           </div>
         </div>
 
-        <div className={cn(TWO_LINE_CELL_CLASS, "text-left leading-tight")}>
+        <div className={cn(TWO_LINE_CELL_CLASS, "text-left leading-tight h-[40px]")}>
           <div className="truncate">{memSummary}</div>
           <div className="flex items-center h-2">
             {enableListItemProgressBar ? <ProgressBar value={memUsage} h="h-2" /> : null}
@@ -345,7 +345,7 @@ const NodeTableRow = ({ node, enableListItemProgressBar }: NodeTableRowProps) =>
           </div>
         </div>
 
-        <div className="min-w-0 text-center leading-tight">
+        <div className={cn(TWO_LINE_CELL_CLASS, "text-left leading-tight h-[40px]")}>
           <div className="truncate">
             {stats ? (
               <span style={{ color: getNetworkSpeedColor(stats.net_out) }}>
@@ -370,7 +370,7 @@ const NodeTableRow = ({ node, enableListItemProgressBar }: NodeTableRowProps) =>
           </div>
         </div>
 
-        <div className="min-w-0 text-center leading-tight">
+        <div className={cn(TWO_LINE_CELL_CLASS, "text-left leading-tight h-[40px]")}>
           <div className="truncate">
             {stats
               ? `${t("node.uploadPrefix")} ${formatBytes(stats.net_total_up)}`
@@ -383,7 +383,7 @@ const NodeTableRow = ({ node, enableListItemProgressBar }: NodeTableRowProps) =>
           </div>
         </div>
 
-        <div className={cn(TWO_LINE_CELL_CLASS, "text-left leading-tight")}>
+        <div className={cn(TWO_LINE_CELL_CLASS, "text-left leading-tight h-[40px]")}>
           <div className="truncate">{trafficQuotaSummary}</div>
           <div className="flex items-center h-2">
             {hasTrafficLimit ? (
