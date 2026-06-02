@@ -44,20 +44,36 @@ interface TableColumnDefinition {
   weight: number;
 }
 
+interface ResolvedTableLayout {
+  columnWidthsRem: number[];
+  totalWidthPx: number;
+  template: string;
+}
+
+const TABLE_COLUMN_INDEX = {
+  name: 1,
+  tags: 2,
+  expiry: 3,
+  cpu: 5,
+  ram: 6,
+  disk: 7,
+  quota: 10,
+} as const;
+
 // Native CSS Grid cannot combine a hard min, hard max, and weighted fr growth
 // for the same track, so the table resolves exact pixel widths from metadata.
 const TABLE_COLUMNS: TableColumnDefinition[] = [
-  { minRem: 1, maxRem: 2, weight: 1 },   // #
-  { minRem: 7, maxRem: 10, weight: 1 },  // name
-  { minRem: 0, maxRem: 20, weight: 10 }, // tags
-  { minRem: 0, maxRem: 6, weight: 10 },   // expire
-  { minRem: 4, maxRem: 5, weight: 1 },   // uptime
-  { minRem: 4, maxRem: 11, weight: 2 },  // cpu
-  { minRem: 4, maxRem: 9, weight: 2 },   // ram
-  { minRem: 4, maxRem: 9, weight: 2 },   // stor
-  { minRem: 5, maxRem: 6, weight: 1 },   // speed
-  { minRem: 4, maxRem: 5, weight: 1 },   // traffic
-  { minRem: 4, maxRem: 11, weight: 2 },  // quota
+  { minRem: 1, maxRem: 1, weight: 0 },   // #
+  { minRem: 2.5, maxRem: 7, weight: 6 },  // name
+  { minRem: 0, maxRem: 20, weight: 1 }, // tags
+  { minRem: 0, maxRem: 4.5, weight: 1 },   // expire
+  { minRem: 2.4, maxRem: 3.2, weight: 10 },   // uptime
+  { minRem: 2, maxRem: 10, weight: 4 },  // cpu
+  { minRem: 2, maxRem: 10, weight: 4 },   // ram
+  { minRem: 2, maxRem: 10, weight: 4 },   // stor
+  { minRem: 3.6, maxRem: 4.2, weight: 2 },   // speed
+  { minRem: 3.1, maxRem: 3.2, weight: 2 },   // traffic
+  { minRem: 2, maxRem: 10, weight: 4 },  // quota
 ];
 
 const TABLE_COLUMN_TEMPLATE = TABLE_COLUMNS.map(
@@ -82,6 +98,16 @@ const TABLE_NON_TRACK_WIDTH_REM =
 
 const TABLE_MIN_WIDTH_REM =
   TABLE_TRACK_MIN_WIDTH_REM + TABLE_NON_TRACK_WIDTH_REM;
+const TABLE_TRACK_MAX_WIDTH_REM = TABLE_COLUMNS.reduce(
+  (total, column) => total + column.maxRem,
+  0
+);
+const TABLE_MAX_WIDTH_REM =
+  TABLE_TRACK_MAX_WIDTH_REM + TABLE_NON_TRACK_WIDTH_REM;
+
+const PROGRESS_COLUMN_COMPACT_OFFSET_REM = 4;
+const ZERO_MIN_COLUMN_HIDE_THRESHOLD_REM = 2;
+const NAME_COLUMN_HIDE_PRICE_THRESHOLD_REM = 4.5;
 
 const getRootFontSize = () => {
   if (typeof window === "undefined") {
@@ -95,7 +121,13 @@ const getRootFontSize = () => {
   return Number.isFinite(fontSize) && fontSize > 0 ? fontSize : 16;
 };
 
-const buildTableColumnTemplate = (availableWidthPx: number) => {
+const getMinTableLayout = (): ResolvedTableLayout => ({
+  columnWidthsRem: TABLE_COLUMNS.map((column) => column.minRem),
+  totalWidthPx: TABLE_MIN_WIDTH_REM * getRootFontSize(),
+  template: TABLE_COLUMN_TEMPLATE,
+});
+
+const buildTableLayout = (availableWidthPx: number): ResolvedTableLayout => {
   const rootFontSize = getRootFontSize();
   const availableTrackWidthPx = Math.max(
     availableWidthPx - TABLE_NON_TRACK_WIDTH_REM * rootFontSize,
@@ -145,8 +177,26 @@ const buildTableColumnTemplate = (availableWidthPx: number) => {
     );
   }
 
-  return columns.map((column) => `${column.currentWidthPx.toFixed(2)}px`).join(" ");
+  return {
+    columnWidthsRem: columns.map((column) => column.currentWidthPx / rootFontSize),
+    totalWidthPx:
+      columns.reduce((total, column) => total + column.currentWidthPx, 0) +
+      TABLE_NON_TRACK_WIDTH_REM * rootFontSize,
+    template: columns.map((column) => `${column.currentWidthPx.toFixed(2)}px`).join(" "),
+  };
 };
+
+const isCompactProgressColumn = (
+  columnIndex: number,
+  columnWidthsRem: number[]
+) => columnWidthsRem[columnIndex] < TABLE_COLUMNS[columnIndex].maxRem - PROGRESS_COLUMN_COMPACT_OFFSET_REM;
+
+const shouldHideZeroMinColumnContent = (
+  columnIndex: number,
+  columnWidthsRem: number[]
+) =>
+  TABLE_COLUMNS[columnIndex].minRem === 0 &&
+  columnWidthsRem[columnIndex] < ZERO_MIN_COLUMN_HIDE_THRESHOLD_REM;
 
 const TWO_LINE_CELL_CLASS = "min-w-0 h-9 grid grid-rows-2 items-center";
 
@@ -157,7 +207,7 @@ export const NodeTable = ({
   const { t } = useLocale();
   const viewportRef =
     useRef<React.ElementRef<typeof ScrollAreaPrimitive.Viewport>>(null);
-  const [gridContentWidth, setGridContentWidth] = useState<number | null>(null);
+  const [availableTableWidthPx, setAvailableTableWidthPx] = useState<number | null>(null);
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -167,13 +217,17 @@ export const NodeTable = ({
     }
 
     const updateWidth = (nextWidth: number) => {
-      setGridContentWidth((currentWidth) =>
+      setAvailableTableWidthPx((currentWidth) =>
         currentWidth !== nextWidth ? nextWidth : currentWidth
       );
     };
 
     const readContentWidth = () => {
-      updateWidth(Math.max(viewport.clientWidth, 0));
+      const mainContent = viewport.closest("main");
+      const mainContentWidth =
+        mainContent instanceof HTMLElement ? mainContent.clientWidth : viewport.clientWidth;
+
+      updateWidth(Math.max(Math.min(viewport.clientWidth, mainContentWidth), 0));
     };
 
     readContentWidth();
@@ -190,7 +244,7 @@ export const NodeTable = ({
         return;
       }
 
-      updateWidth(Math.max(entry.contentRect.width, 0));
+      readContentWidth();
     });
 
     observer.observe(viewport);
@@ -198,28 +252,47 @@ export const NodeTable = ({
     return () => observer.disconnect();
   }, []);
 
-  const columnTemplate = useMemo(() => {
-    if (!gridContentWidth) {
-      return TABLE_COLUMN_TEMPLATE;
+  const tableLayout = useMemo(() => {
+    if (!availableTableWidthPx) {
+      return getMinTableLayout();
     }
 
-    return buildTableColumnTemplate(gridContentWidth);
-  }, [gridContentWidth]);
+    return buildTableLayout(availableTableWidthPx);
+  }, [availableTableWidthPx]);
+
+  const hideTagsHeader = shouldHideZeroMinColumnContent(
+    TABLE_COLUMN_INDEX.tags,
+    tableLayout.columnWidthsRem
+  );
+  const hideExpiryHeader = shouldHideZeroMinColumnContent(
+    TABLE_COLUMN_INDEX.expiry,
+    tableLayout.columnWidthsRem
+  );
 
   return (
     <ScrollArea
       className="w-full"
       showHorizontalScrollbar
       viewportRef={viewportRef}>
-      <div className="px-1 pb-1" style={{ minWidth: `${TABLE_MIN_WIDTH_REM}rem` }}>
+      <div
+        className="box-border px-1 pb-1 mx-auto"
+        style={{
+          minWidth: `${TABLE_MIN_WIDTH_REM}rem`,
+          width: `${tableLayout.totalWidthPx}px`,
+          maxWidth: `min(${TABLE_MAX_WIDTH_REM}rem, var(--main-width))`,
+        }}>
         <div className="space-y-0.5">
           <Card
             className="theme-card-style text-primary font-semibold grid gap-x-1 gap-y-1 p-1 items-center text-xs"
-            style={{ gridTemplateColumns: columnTemplate }}>
+            style={{ gridTemplateColumns: tableLayout.template }}>
             <div className="text-center"></div>
             <div className="text-left">{t("node.name")}</div>
-            <div className="text-left truncate rt-r-min-w-0 min-w-0">{t("node.tags")}</div>
-            <div className="text-right truncate rt-r-min-w-0 min-w-0">{t("node.expiredAt")}</div>
+            <div className="text-left truncate rt-r-min-w-0 min-w-0">
+              {hideTagsHeader ? "" : t("node.tags")}
+            </div>
+            <div className="text-right truncate rt-r-min-w-0 min-w-0">
+              {hideExpiryHeader ? "" : t("node.expiredAt")}
+            </div>
             <div className="text-right">{t("node.uptime")}</div>
             <div className="text-left flex items-center gap-1">
               <CpuIcon className="size-4 text-blue-600" />
@@ -239,7 +312,8 @@ export const NodeTable = ({
           </Card>
           {nodes.map((node) => (
             <NodeTableRow
-              columnTemplate={columnTemplate}
+              columnTemplate={tableLayout.template}
+              columnWidthsRem={tableLayout.columnWidthsRem}
               key={node.uuid}
               node={node}
               enableListItemProgressBar={enableListItemProgressBar}
@@ -253,12 +327,14 @@ export const NodeTable = ({
 
 interface NodeTableRowProps {
   columnTemplate: string;
+  columnWidthsRem: number[];
   node: NodeData;
   enableListItemProgressBar: boolean;
 }
 
 const NodeTableRow = ({
   columnTemplate,
+  columnWidthsRem,
   node,
   enableListItemProgressBar,
 }: NodeTableRowProps) => {
@@ -401,6 +477,50 @@ const NodeTableRow = ({
       )})`
     : `${t("node.notAvailable")} (${formatBytes(node.disk_total)})`;
 
+  const compactCpuSummary = isOnline
+    ? formatPercentage(cpuUsage)
+    : t("node.notAvailable");
+  const compactMemSummary = isOnline && stats
+    ? formatPercentage(memUsage)
+    : t("node.notAvailable");
+  const compactDiskSummary = isOnline && stats
+    ? formatPercentage(diskUsage)
+    : t("node.notAvailable");
+  const compactTrafficQuotaSummary = isUnlimitedTraffic
+    ? "∞"
+    : hasTrafficLimit && stats && isOnline
+      ? formatPercentage(trafficPercentage)
+      : !hasTrafficLimit
+        ? t("node.notSet")
+        : t("node.notAvailable");
+
+  const hideTagsContent = shouldHideZeroMinColumnContent(
+    TABLE_COLUMN_INDEX.tags,
+    columnWidthsRem
+  );
+  const hideNamePriceContent =
+    columnWidthsRem[TABLE_COLUMN_INDEX.name] < NAME_COLUMN_HIDE_PRICE_THRESHOLD_REM;
+  const hideExpiryContent = shouldHideZeroMinColumnContent(
+    TABLE_COLUMN_INDEX.expiry,
+    columnWidthsRem
+  );
+  const compactCpuContent = isCompactProgressColumn(
+    TABLE_COLUMN_INDEX.cpu,
+    columnWidthsRem
+  );
+  const compactMemContent = isCompactProgressColumn(
+    TABLE_COLUMN_INDEX.ram,
+    columnWidthsRem
+  );
+  const compactDiskContent = isCompactProgressColumn(
+    TABLE_COLUMN_INDEX.disk,
+    columnWidthsRem
+  );
+  const compactQuotaContent = isCompactProgressColumn(
+    TABLE_COLUMN_INDEX.quota,
+    columnWidthsRem
+  );
+
   return (
     <Card
       className={cn(
@@ -439,15 +559,17 @@ const NodeTableRow = ({
                 loading="lazy"
               />
             </span>
-            <span className="truncate">{nodePrice || ""}</span>
+            {!hideNamePriceContent ? (
+              <span className="truncate">{nodePrice || ""}</span>
+            ) : null}
           </div>
         </div>
 
         <div className="min-w-0 text-left h-[40px]">
-          {customTags.length > 0 ? (
+          {hideTagsContent ? null : customTags.length > 0 ? (
             <div className="max-h-[40px] overflow-hidden">
               <Tag
-                className="!gap-0.5 origin-top-left scale-95 [&_.rt-Badge]:!text-[10px] [&_[data-accent-color]]:!text-[10px]"
+                className="!gap-0.5 origin-top-left scale-92 [&_.rt-Badge]:!text-[10px] [&_[data-accent-color]]:!text-[10px]"
                 tags={customTags}
               />
             </div>
@@ -457,9 +579,9 @@ const NodeTableRow = ({
         </div>
 
         <div className={cn(TWO_LINE_CELL_CLASS, "text-right leading-tight h-[40px]")}>
-          <div className="truncate">{expired_at}</div>
+          <div className="truncate">{hideExpiryContent ? "" : expired_at}</div>
           <div className="truncate text-secondary-foreground">
-            {remainingInfo.text ? (
+            {!hideExpiryContent && remainingInfo.text ? (
               <span style={{ color: remainingInfo.color }}>{remainingInfo.text}</span>
             ) : (
               ""
@@ -481,21 +603,27 @@ const NodeTableRow = ({
         </div>
 
         <div className={cn(TWO_LINE_CELL_CLASS, "text-left leading-tight h-[40px]")}>
-          <div className="truncate">{cpuSummary}</div>
+          <div className="truncate" title={cpuSummary}>
+            {compactCpuContent ? compactCpuSummary : cpuSummary}
+          </div>
           <div className="flex items-center h-2">
             {enableListItemProgressBar ? <ProgressBar value={cpuUsage} h="h-2" /> : null}
           </div>
         </div>
 
         <div className={cn(TWO_LINE_CELL_CLASS, "text-left leading-tight h-[40px]")}>
-          <div className="truncate">{memSummary}</div>
+          <div className="truncate" title={memSummary}>
+            {compactMemContent ? compactMemSummary : memSummary}
+          </div>
           <div className="flex items-center h-2">
             {enableListItemProgressBar ? <ProgressBar value={memUsage} h="h-2" /> : null}
           </div>
         </div>
 
         <div className={cn(TWO_LINE_CELL_CLASS, "text-left leading-tight")}>
-          <div className="truncate">{diskSummary}</div>
+          <div className="truncate" title={diskSummary}>
+            {compactDiskContent ? compactDiskSummary : diskSummary}
+          </div>
           <div className="flex items-center h-2">
             {enableListItemProgressBar ? <ProgressBar value={diskUsage} h="h-2" /> : null}
           </div>
@@ -540,7 +668,9 @@ const NodeTableRow = ({
         </div>
 
         <div className={cn(TWO_LINE_CELL_CLASS, "text-left leading-tight h-[40px]")}>
-          <div className="truncate">{trafficQuotaSummary}</div>
+          <div className="truncate" title={trafficQuotaSummary}>
+            {compactQuotaContent ? compactTrafficQuotaSummary : trafficQuotaSummary}
+          </div>
           <div className="flex items-center h-2">
             {hasTrafficLimit ? (
               <ProgressBar value={isOnline ? trafficPercentage : 0} h="h-2" />
