@@ -704,15 +704,15 @@ const NodeTableRow = ({
         <div
           className={cn(
             "grid gap-4 p-2",
-            enablePingChart ? "grid-cols-3" : ""
+            enablePingChart && enableInstanceDetail ? "xl:grid-cols-3" : ""
           )}>
           {enableInstanceDetail && (
-            <div className="col-span-1 @container">
+            <div className="xl:col-span-1 @container">
               <Instance node={node} />
             </div>
           )}
           {enablePingChart && (
-            <div className={enableInstanceDetail ? "col-span-2" : "col-span-3"}>
+            <div className={enableInstanceDetail ? "xl:col-span-2" : ""}>
               {shouldRenderChart && (
                 <PingChart node={node} initialHours={pingChartTimeInPreview} />
               )}

@@ -62,7 +62,7 @@ const parseDateInput = (value: DateInput): Date | null => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
-export const formatIsoDate = (value: DateInput, fallback = "N/A") => {
+export const formatIsoDate = (value: DateInput, fallback = "-") => {
   const date = parseDateInput(value);
   if (!date) return fallback;
 
@@ -74,7 +74,7 @@ export const formatIsoDate = (value: DateInput, fallback = "N/A") => {
 export const formatIsoTime = (
   value: DateInput,
   includeSeconds = true,
-  fallback = "N/A"
+  fallback = "-"
 ) => {
   const date = parseDateInput(value);
   if (!date) return fallback;
@@ -86,7 +86,7 @@ export const formatIsoTime = (
 export const formatIsoDateTime = (
   value: DateInput,
   includeSeconds = true,
-  fallback = "N/A"
+  fallback = "-"
 ) => {
   const datePart = formatIsoDate(value, fallback);
   const timePart = formatIsoTime(value, includeSeconds, fallback);
@@ -101,7 +101,7 @@ export const formatIsoDateTime = (
 export const formatIsoMonthDayTime = (
   value: DateInput,
   includeSeconds = false,
-  fallback = "N/A"
+  fallback = "-"
 ) => {
   const date = parseDateInput(value);
   if (!date) return fallback;
@@ -115,7 +115,7 @@ export const formatIsoMonthDayTime = (
 export const formatSignificantDigits = (
   value: number,
   significantDigits = 3,
-  fallback = "N/A"
+  fallback = "-"
 ) => {
   if (!Number.isFinite(value)) return fallback;
 
@@ -133,7 +133,7 @@ export const formatSignificantDigits = (
 export const formatPercentage = (
   value: number,
   significantDigits = 3,
-  fallback = "N/A"
+  fallback = "-"
 ) => {
   const formatted = formatSignificantDigits(value, significantDigits, fallback);
   return formatted === fallback ? fallback : `${formatted}%`;
@@ -142,11 +142,46 @@ export const formatPercentage = (
 export const formatLoadValue = (
   value: number,
   significantDigits = 3,
-  fallback = "N/A"
+  fallback = "-"
 ) => {
   if (!Number.isFinite(value)) return fallback;
 
   return formatSignificantDigits(value, significantDigits, fallback);
+};
+
+const HARDWARE_NAME_NOISE_PATTERNS = [
+  /\(R\)/gi,
+  /\(TM\)/gi,
+  /\bProcessor\b/gi,
+  /\bCPU\b/gi,
+  /\bGPU\b/gi,
+  /\bCorporation\b/gi,
+  /\bGeneration\b/gi,
+];
+
+export const formatHardwareName = (
+  value: string | null | undefined,
+  fallback = "-"
+) => {
+  if (value === null || value === undefined) {
+    return fallback;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.toLowerCase() === "none") {
+    return fallback;
+  }
+
+  const stripped = HARDWARE_NAME_NOISE_PATTERNS.reduce(
+    (current, pattern) => current.replace(pattern, " "),
+    trimmed
+  )
+    .replace(/\s{2,}/g, " ")
+    .replace(/\s+([,)\]/])/g, "$1")
+    .replace(/([(\[] )/g, (match) => match.trimEnd())
+    .trim();
+
+  return stripped || fallback;
 };
 
 export const bytesPerSecondToMbps = (bytesPerSecond: number) =>
@@ -155,7 +190,7 @@ export const bytesPerSecondToMbps = (bytesPerSecond: number) =>
 export const formatNetworkSpeedMbps = (
   bytesPerSecond: number,
   significantDigits = 3,
-  fallback = "N/A"
+  fallback = "-"
 ) => {
   if (!Number.isFinite(bytesPerSecond)) return fallback;
 
@@ -336,11 +371,11 @@ export const formatBytes = (
 // Helper function to format uptime
 export const formatUptime = (seconds: number) => {
   if (isNaN(seconds) || seconds < 0) {
-    return "N/A";
+    return "-";
   }
 
   const hours = seconds / 3600;
-  return formatSignificantDigits(hours, 3, "N/A");
+  return formatSignificantDigits(hours, 3, "-");
 };
 
 export const formatUptimeValue = (
@@ -348,7 +383,7 @@ export const formatUptimeValue = (
   monthThresholdHours = 720
 ) => {
   if (isNaN(seconds) || seconds < 0) {
-    return { value: "N/A", unit: "hr", hours: Number.NaN };
+    return { value: "-", unit: "hr", hours: Number.NaN };
   }
 
   const hours = seconds / 3600;
@@ -356,7 +391,7 @@ export const formatUptimeValue = (
   const displayValue = useMonths ? hours / monthThresholdHours : hours;
 
   return {
-    value: formatSignificantDigits(displayValue, 3, "N/A"),
+    value: formatSignificantDigits(displayValue, 3, "-"),
     unit: useMonths ? "mo" : "hr",
     hours,
   };
@@ -366,11 +401,11 @@ export const formatOfflineHours = (updatedAt: DateInput, now = Date.now()) => {
   const date = parseDateInput(updatedAt);
 
   if (!date) {
-    return "N/A";
+    return "-";
   }
 
   const diffMs = Math.max(now - date.getTime(), 0);
-  return formatSignificantDigits(diffMs / (1000 * 60 * 60), 3, "N/A");
+  return formatSignificantDigits(diffMs / (1000 * 60 * 60), 3, "-");
 };
 
 export interface PriceFormatLabels {

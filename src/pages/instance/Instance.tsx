@@ -1,73 +1,77 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import type { NodeData } from "@/types/node";
 import {
   memo,
   useMemo,
-  type CSSProperties,
   type ReactNode,
 } from "react";
 import {
   formatBytes,
+  formatHardwareName,
   formatIsoDateTime,
   formatLoadValue,
   formatNetworkSpeedMbps,
+  formatOfflineHours,
+  formatPercentage,
   formatUptime,
   getTrafficLimitTypeLabel,
   getNetworkSpeedColor,
+  getProgressBarColor,
   getUptimeHoursColor,
 } from "@/utils";
 import { useNodeCommons } from "@/hooks/useNodeCommons";
 import { useLiveData } from "@/contexts/LiveDataContext";
 import { useLocale } from "@/config/hooks";
 
-interface InfoItemProps {
+interface DetailLine {
   label: string;
   value: ReactNode;
-  className?: string;
 }
 
-const clamp2Style: CSSProperties = {
-  display: "-webkit-box",
-  WebkitLineClamp: 2,
-  WebkitBoxOrient: "vertical",
-  overflow: "hidden",
-};
-
-const TwoLine = ({ line1, line2 }: { line1: ReactNode; line2: ReactNode }) => (
-  <div className="leading-5">
-    <div className="truncate">{line1}</div>
-    {line2 ? <div className="truncate">{line2}</div> : null}
-  </div>
+const LineValue = ({ children }: { children: ReactNode }) => (
+  <div className="min-w-0 overflow-hidden text-primary">{children}</div>
 );
 
-const FractionLines = ({
-  top,
-  bottom,
+const LineValueText = ({ value }: { value: string }) => (
+  <span className="block min-w-0 truncate text-primary">
+    {value}
+  </span>
+);
+
+const PercentageValue = ({ value }: { value: number }) => (
+  <span style={{ color: getProgressBarColor(value) }}>{formatPercentage(value)}</span>
+);
+
+const ProgressTint = ({
+  value,
+  children,
 }: {
-  top: ReactNode;
-  bottom: ReactNode;
-}) => (
-  <div className="inline-flex flex-col items-start leading-5 max-w-full w-fit">
-    <div className="truncate max-w-full">{top}</div>
-    <span className="block h-px w-full bg-(--accent-6)/80 mt-0.5 mb-0.5" />
-    <div className="truncate max-w-full">{bottom}</div>
-  </div>
+  value: number;
+  children: ReactNode;
+}) => <span style={{ color: getProgressBarColor(value) }}>{children}</span>;
+
+const InlineSummary = ({ children }: { children: ReactNode }) => (
+  <span className="inline-flex max-w-full items-center gap-1.5 overflow-hidden whitespace-nowrap">
+    {children}
+  </span>
 );
 
-const InfoItem = ({ label, value, className }: InfoItemProps) => (
-  <div className={`px-2 py-1 min-w-0 ${className || ""}`}>
-    <p className="text-secondary-foreground leading-5 truncate">{label}</p>
-    {typeof value === "string" ? (
-      <p className="leading-5 text-sm whitespace-normal" style={clamp2Style}>
-        {value}
-      </p>
-    ) : (
-      <div className="overflow-hidden text-sm leading-5">
-        {value}
-      </div>
-    )}
-  </div>
+const FixedSummaryCell = ({ children }: { children: ReactNode }) => (
+  <span className="inline-block w-[5rem] overflow-hidden truncate align-top">
+    {children}
+  </span>
 );
+
+const DetailLineRow = memo(({ label, value }: DetailLine) => (
+  <>
+    <span className="text-secondary-foreground whitespace-nowrap">
+      {label}
+    </span>
+    {typeof value === "string" ? <LineValueText value={value} /> : <LineValue>{value}</LineValue>}
+  </>
+));
+
+DetailLineRow.displayName = "DetailLineRow";
 
 interface InstanceProps {
   node: NodeData;
@@ -125,182 +129,227 @@ const Instance = memo(({ node }: InstanceProps) => {
     }
   );
 
-  return (
-    <Card className="h-full">
-      <CardHeader className="pb-2">
-        <CardTitle>{t("instancePage.title")}</CardTitle>
-      </CardHeader>
-      <CardContent className="grid grid-cols-4 gap-0 text-sm">
-        {/* row 1 */}
-        <InfoItem
-          className="col-span-2 border-r border-b border-(--accent-7)/70"
-          label={t("instancePage.os")}
-          value={node.os}
-        />
-        <InfoItem
-          className="border-r border-b border-(--accent-7)/70"
-          label={t("instancePage.architecture")}
-          value={node.arch.toLocaleUpperCase()}
-        />
-        <InfoItem
-          className="border-b border-(--accent-7)/70"
-          label={t("instancePage.virtualization")}
-          value={normalizeDetailText(node.virtualization).toLocaleUpperCase()}
-        />
+  const memoryPercentage =
+    stats && isOnline && node.mem_total > 0 ? (stats.ram / node.mem_total) * 100 : null;
 
-        {/* row 2 */}
-        <InfoItem
-          className="col-span-3 border-r border-b border-(--accent-7)/70"
-          label={t("instancePage.cpu")}
-          value={`${node.cpu_name} × ${node.cpu_cores}`}
-        />
-        <InfoItem
-          className="border-b border-(--accent-7)/70"
-          label={t("instancePage.load")}
-          value={
-            stats && isOnline
-              ? `${formatLoadValue(stats.load)} | ${formatLoadValue(
-                  stats.load5
-                )} | ${formatLoadValue(stats.load15)}`
-              : t("node.notAvailable")
-          }
-        />
+  const swapPercentage =
+    stats && isOnline && node.swap_total > 0 ? (stats.swap / node.swap_total) * 100 : null;
 
-        {/* row 3 */}
-        <InfoItem
-          className="col-span-3 border-r border-b border-(--accent-7)/70"
-          label={t("instancePage.gpu")}
-          value={normalizeDetailText(node.gpu_name)}
-        />
-        <div aria-hidden="true" className="border-b border-(--accent-7)/70" />
+  const diskPercentage =
+    stats && isOnline && node.disk_total > 0 ? (stats.disk / node.disk_total) * 100 : null;
 
-        {/* row 4 */}
-        <InfoItem
-          className="border-r border-b border-(--accent-7)/70"
-          label={t("instancePage.mem")}
-          value={
-            <FractionLines
-              top={stats && isOnline ? formatBytes(stats.ram) : t("node.notAvailable")}
-              bottom={formatBytes(node.mem_total)}
-            />
-          }
-        />
-        <InfoItem
-          className="border-r border-b border-(--accent-7)/70"
-          label={t("instancePage.swap")}
-          value={
-            <FractionLines
-              top={stats && isOnline ? formatBytes(stats.swap) : t("node.notAvailable")}
-              bottom={
-                node.swap_total > 0 ? formatBytes(node.swap_total) : t("node.off")
-              }
-            />
-          }
-        />
-        <InfoItem
-          className="border-r border-b border-(--accent-7)/70"
-          label={t("instancePage.disk")}
-          value={
-            <FractionLines
-              top={stats && isOnline ? formatBytes(stats.disk) : t("node.notAvailable")}
-              bottom={formatBytes(node.disk_total)}
-            />
-          }
-        />
-        <div aria-hidden="true" className="border-b border-(--accent-7)/70" />
+  const trafficPercentage =
+    node.traffic_limit && node.traffic_limit > 0 && stats && isOnline && trafficUsed !== null
+      ? (trafficUsed / node.traffic_limit) * 100
+      : null;
 
-        {/* row 5 */}
-        <InfoItem
-          className="border-r border-b border-(--accent-7)/70"
-          label={t("instancePage.realtimeNetwork")}
-          value={
-            stats && isOnline ? (
-              <TwoLine
-                line1={
-                  <span style={{ color: getNetworkSpeedColor(stats.net_out) }}>
-                    {`${t("node.uploadPrefix")} ${formatNetworkSpeedMbps(
-                      stats.net_out
-                    )}`}
-                  </span>
-                }
-                line2={
-                  <span style={{ color: getNetworkSpeedColor(stats.net_in) }}>
-                    {`${t("node.downloadPrefix")} ${formatNetworkSpeedMbps(
-                      stats.net_in
-                    )}`}
-                  </span>
-                }
-              />
+  const lastReportTime =
+    stats && typeof stats === "object"
+      ? ("time" in stats && typeof stats.time === "string" && stats.time) ||
+        ("updated_at" in stats && typeof stats.updated_at === "string" && stats.updated_at) ||
+        node.updated_at
+      : node.updated_at;
+
+  const offlineHours = formatOfflineHours(lastReportTime);
+  const virtualizationText = normalizeDetailText(node.virtualization).toLocaleUpperCase();
+  const cpuDisplayName = formatHardwareName(node.cpu_name);
+  const gpuDisplayName = formatHardwareName(node.gpu_name);
+  const systemSummary =
+    virtualizationText === "-"
+      ? `${normalizeDetailText(node.os)} | ${normalizeDetailText(node.arch).toLocaleUpperCase()}`
+      : `${normalizeDetailText(node.os)} | ${normalizeDetailText(node.arch).toLocaleUpperCase()} | ${virtualizationText}`;
+  const cpuModelSummary =
+    cpuDisplayName === "-" ? cpuDisplayName : `${cpuDisplayName} × ${node.cpu_cores}`;
+
+  const cpuSummary = stats && isOnline
+    ? (
+        <div className="min-w-0 overflow-hidden">
+          <div className="truncate">{cpuModelSummary}</div>
+          <InlineSummary>
+            <span className="shrink-0">
+              <PercentageValue value={stats.cpu} />
+            </span>
+            <span className="shrink-0">|</span>
+            <span className="truncate">{`${formatLoadValue(stats.load)} / ${formatLoadValue(stats.load5)} / ${formatLoadValue(stats.load15)}`}</span>
+          </InlineSummary>
+        </div>
+      )
+    : cpuModelSummary;
+
+  const memorySummary = stats && isOnline
+    ? (
+        <InlineSummary>
+          {memoryPercentage !== null ? (
+            <ProgressTint value={memoryPercentage}>
+              <span className="truncate">{`${formatBytes(stats.ram)} / ${formatBytes(node.mem_total)}`}</span>
+              <span className="shrink-0"> (<PercentageValue value={memoryPercentage} />)</span>
+            </ProgressTint>
+          ) : (
+            <span className="truncate">{`${formatBytes(stats.ram)} / ${formatBytes(node.mem_total)}`}</span>
+          )}
+        </InlineSummary>
+      )
+    : formatBytes(node.mem_total);
+
+  const swapSummary = stats && isOnline
+    ? (
+        <InlineSummary>
+          {node.swap_total <= 0 ? (
+            <span className="truncate">-</span>
+          ) : swapPercentage !== null ? (
+            <ProgressTint value={swapPercentage}>
+              <span className="truncate">{`${formatBytes(stats.swap)} / ${
+                formatBytes(node.swap_total)
+              }`}</span>
+              <span className="shrink-0"> (<PercentageValue value={swapPercentage} />)</span>
+            </ProgressTint>
+          ) : (
+            <span className="truncate">{`${formatBytes(stats.swap)} / ${formatBytes(node.swap_total)}`}</span>
+          )}
+        </InlineSummary>
+      )
+    : node.swap_total > 0
+    ? formatBytes(node.swap_total)
+    : "-";
+
+  const diskSummary = stats && isOnline
+    ? (
+        <InlineSummary>
+          {diskPercentage !== null ? (
+            <ProgressTint value={diskPercentage}>
+              <span className="truncate">{`${formatBytes(stats.disk)} / ${formatBytes(node.disk_total)}`}</span>
+              <span className="shrink-0"> (<PercentageValue value={diskPercentage} />)</span>
+            </ProgressTint>
+          ) : (
+            <span className="truncate">{`${formatBytes(stats.disk)} / ${formatBytes(node.disk_total)}`}</span>
+          )}
+        </InlineSummary>
+      )
+    : formatBytes(node.disk_total);
+
+  const networkLiveLine = stats && isOnline
+    ? (
+        <InlineSummary>
+          <FixedSummaryCell>
+            <span style={{ color: getNetworkSpeedColor(stats.net_out) }}>
+              {`${t("node.uploadPrefix")} ${formatNetworkSpeedMbps(stats.net_out)}`}
+            </span>
+          </FixedSummaryCell>
+          <FixedSummaryCell>
+            <span style={{ color: getNetworkSpeedColor(stats.net_in) }}>
+              {`${t("node.downloadPrefix")} ${formatNetworkSpeedMbps(stats.net_in)}`}
+            </span>
+          </FixedSummaryCell>
+        </InlineSummary>
+      )
+    : t("node.notAvailable");
+
+  const trafficSummary =
+    node.traffic_limit === 0
+      ? "∞"
+      : node.traffic_limit === undefined
+      ? t("node.notSet")
+      : (
+          <InlineSummary>
+            {trafficPercentage !== null ? (
+              <ProgressTint value={trafficPercentage}>
+                <span className="truncate">
+                  {`${stats && isOnline && trafficUsed !== null ? formatBytes(trafficUsed) : t("node.notAvailable")} / ${formatBytes(node.traffic_limit)} ${trafficTypeText}`}
+                </span>
+                <span className="shrink-0"> (<PercentageValue value={trafficPercentage} />)</span>
+              </ProgressTint>
             ) : (
-              t("node.notAvailable")
-            )
-          }
-        />
-        <InfoItem
-          className="border-r border-b border-(--accent-7)/70"
-          label={t("instancePage.totalTraffic")}
-          value={
-            stats && isOnline ? (
-              <TwoLine
-                line1={`${t("node.uploadPrefix")} ${formatBytes(
-                  stats.net_total_up
-                )}`}
-                line2={`${t("node.downloadPrefix")} ${formatBytes(
-                  stats.net_total_down
-                )}`}
-              />
-            ) : (
-              t("node.notAvailable")
-            )
-          }
-        />
-        <InfoItem
-          className="border-r border-b border-(--accent-7)/70"
-          label={t("node.traffic")}
-          value={
-            node.traffic_limit === 0
-              ? "∞"
-              : node.traffic_limit === undefined
-              ? t("node.notSet")
-              : (
-                  <FractionLines
-                    top={
-                      stats && isOnline && trafficUsed !== null
-                        ? formatBytes(trafficUsed)
-                        : t("node.notAvailable")
-                    }
-                    bottom={`${formatBytes(node.traffic_limit)} ${trafficTypeText}`}
-                  />
-                )
-          }
-        />
-        <div aria-hidden="true" className="border-b border-(--accent-7)/70" />
-
-        {/* row 6 */}
-        <InfoItem
-          className="border-r border-(--accent-7)/70"
-          label={t("instancePage.runtime")}
-          value={
-            stats && isOnline ? (
-              <span style={{ color: getUptimeHoursColor(stats.uptime / 3600) }}>
-                {t("instancePage.uptimeHours", { count: formatUptime(stats.uptime) })}
+              <span className="truncate">
+                {`${stats && isOnline && trafficUsed !== null ? formatBytes(trafficUsed) : t("node.notAvailable")} / ${formatBytes(node.traffic_limit)} ${trafficTypeText}`}
               </span>
-            ) : (
-              t("node.notAvailable")
-            )
-          }
-        />
-        <InfoItem
-          className="border-r border-(--accent-7)/70"
-          label={t("instancePage.lastUpdated")}
-          value={
-            stats
-              ? formatIsoDateTime(stats.time, true, t("node.notAvailable"))
-              : t("node.notAvailable")
-          }
-        />
-        <div aria-hidden="true" className="border-r border-(--accent-7)/70" />
-        <div aria-hidden="true" />
+            )}
+          </InlineSummary>
+        );
+
+  const statusLine = stats ? (
+    <InlineSummary>
+      <span className={isOnline ? "text-white" : "text-red-500"}>
+        {isOnline ? "ONLINE" : "OFFLINE"}
+      </span>
+      {isOnline ? (
+        <span style={{ color: getUptimeHoursColor(stats.uptime / 3600) }}>
+          {`${formatUptime(stats.uptime)} hr`}
+        </span>
+      ) : (
+        <span className="text-red-500">{`${offlineHours} hr`}</span>
+      )}
+      <span className="text-secondary-foreground">{isOnline ? "by" : "since"}</span>
+      <span className="truncate text-primary">
+        {formatIsoDateTime(lastReportTime, true, t("node.notAvailable"))}
+      </span>
+    </InlineSummary>
+  ) : (
+    t("node.notAvailable")
+  );
+
+  const detailLines: DetailLine[] = [
+    {
+      label: t("instancePage.sys"),
+      value: systemSummary,
+    },
+    {
+      label: t("instancePage.cpu"),
+      value: cpuSummary,
+    },
+    {
+      label: t("instancePage.gpu"),
+      value: gpuDisplayName,
+    },
+    {
+      label: t("instancePage.mem"),
+      value: memorySummary,
+    },
+    {
+      label: t("instancePage.swap"),
+      value: swapSummary,
+    },
+    {
+      label: t("instancePage.disk"),
+      value: diskSummary,
+    },
+    {
+      label: t("instancePage.realtimeNetwork"),
+      value: networkLiveLine,
+    },
+    {
+      label: t("instancePage.totalTraffic"),
+      value:
+        stats && isOnline ? (
+          <InlineSummary>
+            <FixedSummaryCell>{`${t("node.uploadPrefix")} ${formatBytes(stats.net_total_up)}`}</FixedSummaryCell>
+            <FixedSummaryCell>{`${t("node.downloadPrefix")} ${formatBytes(stats.net_total_down)}`}</FixedSummaryCell>
+          </InlineSummary>
+        ) : (
+          t("node.notAvailable")
+        ),
+    },
+    {
+      label: t("instancePage.quota"),
+      value: trafficSummary,
+    },
+    {
+      label: t("instancePage.status"),
+      value: statusLine,
+    },
+  ];
+
+  return (
+    <Card className="h-full overflow-hidden">
+      <CardContent className="p-3">
+        <div className="bg-black/35 px-1 py-0.5">
+          <div className="text-[0.75rem] leading-4.5 md:text-[0.8rem]">
+            <div className="grid grid-cols-[max-content_minmax(0,1fr)] items-start gap-x-2 gap-y-0.75">
+              {detailLines.map((line) => (
+                <DetailLineRow key={line.label} label={line.label} value={line.value} />
+              ))}
+            </div>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
