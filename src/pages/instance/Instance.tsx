@@ -57,7 +57,7 @@ const InlineSummary = ({ children }: { children: ReactNode }) => (
 );
 
 const FixedSummaryCell = ({ children }: { children: ReactNode }) => (
-  <span className="inline-block w-[5rem] overflow-hidden truncate align-top">
+  <span className="inline-block w-[4.5rem] overflow-hidden truncate align-top">
     {children}
   </span>
 );
@@ -347,7 +347,7 @@ const Instance = memo(({ node }: InstanceProps) => {
       <CardContent className="p-3">
         <div className="bg-black/35 px-1 py-0.5">
           <div className="text-[0.75rem] leading-4.5 md:text-[0.8rem]">
-            <div className="grid grid-cols-[max-content_minmax(0,1fr)] items-start gap-x-2 gap-y-0.75">
+            <div className="grid grid-cols-[max-content_minmax(0,1fr)] items-start gap-x-2 gap-y-0.5">
               {detailLines.map((line) => (
                 <DetailLineRow key={line.label} label={line.label} value={line.value} />
               ))}
