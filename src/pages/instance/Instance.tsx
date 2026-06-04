@@ -146,8 +146,8 @@ const Instance = memo(({ node }: InstanceProps) => {
   const lastReportTime =
     stats && typeof stats === "object"
       ? ("time" in stats && typeof stats.time === "string" && stats.time) ||
-        ("updated_at" in stats && typeof stats.updated_at === "string" && stats.updated_at) ||
-        node.updated_at
+      ("updated_at" in stats && typeof stats.updated_at === "string" && stats.updated_at) ||
+      node.updated_at
       : node.updated_at;
 
   const offlineHours = formatOfflineHours(lastReportTime);
@@ -163,93 +163,105 @@ const Instance = memo(({ node }: InstanceProps) => {
 
   const cpuSummary = stats && isOnline
     ? (
-        <div className="min-w-0 overflow-hidden">
-          <div className="truncate">{cpuModelSummary}</div>
-          <InlineSummary>
-            <span className="shrink-0">
-              <PercentageValue value={stats.cpu} />
-            </span>
-            <span className="shrink-0">|</span>
-            <span className="truncate">{`${formatLoadValue(stats.load)} / ${formatLoadValue(stats.load5)} / ${formatLoadValue(stats.load15)}`}</span>
-          </InlineSummary>
-        </div>
-      )
+      <div className="min-w-0 overflow-hidden">
+        <div className="truncate">{cpuModelSummary}</div>
+        <InlineSummary>
+          <span className="shrink-0">
+            <PercentageValue value={stats.cpu} />
+          </span>
+          <span className="shrink-0">|</span>
+          <span className="truncate">{`${formatLoadValue(stats.load)} / ${formatLoadValue(stats.load5)} / ${formatLoadValue(stats.load15)}`}</span>
+        </InlineSummary>
+      </div>
+    )
     : cpuModelSummary;
 
   const memorySummary = stats && isOnline
     ? (
-        <InlineSummary>
-          {memoryPercentage !== null ? (
-            <ProgressTint value={memoryPercentage}>
-              <span className="truncate">{`${formatBytes(stats.ram)} / ${formatBytes(node.mem_total)}`}</span>
-              <span className="shrink-0"> (<PercentageValue value={memoryPercentage} />)</span>
-            </ProgressTint>
-          ) : (
+      <InlineSummary>
+        {memoryPercentage !== null ? (
+          <ProgressTint value={memoryPercentage}>
             <span className="truncate">{`${formatBytes(stats.ram)} / ${formatBytes(node.mem_total)}`}</span>
-          )}
-        </InlineSummary>
-      )
+            <span className="shrink-0"> (<PercentageValue value={memoryPercentage} />)</span>
+          </ProgressTint>
+        ) : (
+          <span className="truncate">{`${formatBytes(stats.ram)} / ${formatBytes(node.mem_total)}`}</span>
+        )}
+      </InlineSummary>
+    )
     : formatBytes(node.mem_total);
 
   const swapSummary = stats && isOnline
     ? (
-        <InlineSummary>
-          {node.swap_total <= 0 ? (
-            <span className="truncate">-</span>
-          ) : swapPercentage !== null ? (
-            <ProgressTint value={swapPercentage}>
-              <span className="truncate">{`${formatBytes(stats.swap)} / ${
-                formatBytes(node.swap_total)
+      <InlineSummary>
+        {node.swap_total <= 0 ? (
+          <span className="truncate">-</span>
+        ) : swapPercentage !== null ? (
+          <ProgressTint value={swapPercentage}>
+            <span className="truncate">{`${formatBytes(stats.swap)} / ${formatBytes(node.swap_total)
               }`}</span>
-              <span className="shrink-0"> (<PercentageValue value={swapPercentage} />)</span>
-            </ProgressTint>
-          ) : (
-            <span className="truncate">{`${formatBytes(stats.swap)} / ${formatBytes(node.swap_total)}`}</span>
-          )}
-        </InlineSummary>
-      )
+            <span className="shrink-0"> (<PercentageValue value={swapPercentage} />)</span>
+          </ProgressTint>
+        ) : (
+          <span className="truncate">{`${formatBytes(stats.swap)} / ${formatBytes(node.swap_total)}`}</span>
+        )}
+      </InlineSummary>
+    )
     : node.swap_total > 0
-    ? formatBytes(node.swap_total)
-    : "-";
+      ? formatBytes(node.swap_total)
+      : "-";
 
   const diskSummary = stats && isOnline
     ? (
-        <InlineSummary>
-          {diskPercentage !== null ? (
-            <ProgressTint value={diskPercentage}>
-              <span className="truncate">{`${formatBytes(stats.disk)} / ${formatBytes(node.disk_total)}`}</span>
-              <span className="shrink-0"> (<PercentageValue value={diskPercentage} />)</span>
-            </ProgressTint>
-          ) : (
+      <InlineSummary>
+        {diskPercentage !== null ? (
+          <ProgressTint value={diskPercentage}>
             <span className="truncate">{`${formatBytes(stats.disk)} / ${formatBytes(node.disk_total)}`}</span>
-          )}
-        </InlineSummary>
-      )
+            <span className="shrink-0"> (<PercentageValue value={diskPercentage} />)</span>
+          </ProgressTint>
+        ) : (
+          <span className="truncate">{`${formatBytes(stats.disk)} / ${formatBytes(node.disk_total)}`}</span>
+        )}
+      </InlineSummary>
+    )
     : formatBytes(node.disk_total);
 
-  const networkLiveLine = stats && isOnline
+  const speedLine = stats && isOnline
     ? (
-        <InlineSummary>
-          <FixedSummaryCell>
-            <span style={{ color: getNetworkSpeedColor(stats.net_out) }}>
-              {`${t("node.uploadPrefix")} ${formatNetworkSpeedMbps(stats.net_out)}`}
-            </span>
-          </FixedSummaryCell>
-          <FixedSummaryCell>
-            <span style={{ color: getNetworkSpeedColor(stats.net_in) }}>
-              {`${t("node.downloadPrefix")} ${formatNetworkSpeedMbps(stats.net_in)}`}
-            </span>
-          </FixedSummaryCell>
-        </InlineSummary>
-      )
+      <InlineSummary>
+        <FixedSummaryCell>
+          <span style={{ color: getNetworkSpeedColor(stats.net_out) }}>
+            {`${t("node.uploadPrefix")} ${formatNetworkSpeedMbps(stats.net_out)}`}
+          </span>
+        </FixedSummaryCell>
+        <FixedSummaryCell>
+          <span style={{ color: getNetworkSpeedColor(stats.net_in) }}>
+            {`${t("node.downloadPrefix")} ${formatNetworkSpeedMbps(stats.net_in)}`}
+          </span>
+        </FixedSummaryCell>
+      </InlineSummary>
+    )
     : t("node.notAvailable");
 
-  const trafficSummary =
+  const trafficLine = stats && isOnline
+    ? (
+      <InlineSummary>
+        <FixedSummaryCell>
+          {`${t("node.uploadPrefix")} ${formatBytes(stats.net_total_up)}`}
+        </FixedSummaryCell>
+        <FixedSummaryCell>
+          {`${t("node.downloadPrefix")} ${formatBytes(stats.net_total_down)}`}
+        </FixedSummaryCell>
+      </InlineSummary>
+    )
+    : t("node.notAvailable");
+
+  const quotaSummary =
     node.traffic_limit === 0
       ? "∞"
       : node.traffic_limit === undefined
-      ? t("node.notSet")
-      : (
+        ? t("node.notSet")
+        : (
           <InlineSummary>
             {trafficPercentage !== null ? (
               <ProgressTint value={trafficPercentage}>
@@ -313,24 +325,16 @@ const Instance = memo(({ node }: InstanceProps) => {
       value: diskSummary,
     },
     {
-      label: t("instancePage.realtimeNetwork"),
-      value: networkLiveLine,
+      label: t("instancePage.speed"),
+      value: speedLine,
     },
     {
-      label: t("instancePage.totalTraffic"),
-      value:
-        stats && isOnline ? (
-          <InlineSummary>
-            <FixedSummaryCell>{`${t("node.uploadPrefix")} ${formatBytes(stats.net_total_up)}`}</FixedSummaryCell>
-            <FixedSummaryCell>{`${t("node.downloadPrefix")} ${formatBytes(stats.net_total_down)}`}</FixedSummaryCell>
-          </InlineSummary>
-        ) : (
-          t("node.notAvailable")
-        ),
+      label: t("instancePage.traffic"),
+      value: trafficLine,
     },
     {
       label: t("instancePage.quota"),
-      value: trafficSummary,
+      value: quotaSummary,
     },
     {
       label: t("instancePage.status"),

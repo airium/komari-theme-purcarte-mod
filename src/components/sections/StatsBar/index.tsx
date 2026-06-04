@@ -59,6 +59,26 @@ export const StatsBar = (props: StatsBarProps) => {
   const resolvedStats = useMemo<StatEntry[]>(() => {
     const upColor = getNetworkSpeedColor(stats.currentSpeedUp);
     const downColor = getNetworkSpeedColor(stats.currentSpeedDown);
+    const networkSpeedLines = loading
+      ? ["..."]
+      : [
+          <span style={{ color: upColor }}>
+            {`${t("node.uploadPrefix")} ${formatNetworkSpeedMbps(
+              stats.currentSpeedUp
+            )}`}
+          </span>,
+          <span style={{ color: downColor }}>
+            {`${t("node.downloadPrefix")} ${formatNetworkSpeedMbps(
+              stats.currentSpeedDown
+            )}`}
+          </span>,
+        ];
+    const trafficOverviewLines = loading
+      ? ["..."]
+      : [
+          `${t("node.uploadPrefix")} ${formatBytes(stats.totalTrafficUp)}`,
+          `${t("node.downloadPrefix")} ${formatBytes(stats.totalTrafficDown)}`,
+        ];
 
     return [
       {
@@ -79,33 +99,13 @@ export const StatsBar = (props: StatsBarProps) => {
       {
         key: "networkSpeed",
         label: "",
-        lines: loading
-          ? ["..."]
-          : [
-              <span style={{ color: upColor }}>
-                {`${t("node.uploadPrefix")} ${formatNetworkSpeedMbps(
-                  stats.currentSpeedUp
-                )}`}
-              </span>,
-              <span style={{ color: downColor }}>
-                {`${t("node.downloadPrefix")} ${formatNetworkSpeedMbps(
-                  stats.currentSpeedDown
-                )}`}
-              </span>,
-            ],
+        lines: networkSpeedLines,
         textLeft: true,
       },
       {
         key: "trafficOverview",
         label: "",
-        lines: loading
-          ? ["..."]
-          : [
-              `${t("node.uploadPrefix")} ${formatBytes(stats.totalTrafficUp)}`,
-              `${t("node.downloadPrefix")} ${formatBytes(
-                stats.totalTrafficDown
-              )}`,
-            ],
+        lines: trafficOverviewLines,
         textLeft: true,
       },
     ];

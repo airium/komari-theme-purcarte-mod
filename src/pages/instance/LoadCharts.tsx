@@ -89,6 +89,51 @@ const LoadChartCard = ({
   const chartMargin = { top: 8, right: 16, bottom: 8, left: 16 };
 
   const config = useMemo(() => {
+    const memoryValue = (
+      <Flex gap="0" direction="column" align="end">
+        <label>
+          {liveData?.ram
+            ? `${formatBytes(liveData.ram)} / ${formatBytes(
+                node.mem_total || 0
+              )}`
+            : t("node.notAvailable")}
+        </label>
+        <label>
+          {node.swap_total === 0
+            ? t("node.off")
+            : liveData?.swap
+              ? `${formatBytes(liveData.swap)} / ${formatBytes(
+                  node.swap_total || 0
+                )}`
+              : t("node.notAvailable")}
+        </label>
+      </Flex>
+    );
+    const connectionsValue = (
+      <Flex gap="0" align="end" direction="column">
+        <span>
+          {t("chart.tcpPrefix")} {liveData?.connections}
+        </span>
+        <span>
+          {t("chart.udpPrefix")} {liveData?.connections_udp}
+        </span>
+      </Flex>
+    );
+    const networkValue = (
+      <Flex gap="0" align="end" direction="column">
+        <span style={{ color: getNetworkSpeedColor(liveData?.net_out || 0) }}>
+          {`${t("node.uploadPrefix")} ${formatNetworkSpeedMbps(
+            liveData?.net_out || 0
+          )}`}
+        </span>
+        <span style={{ color: getNetworkSpeedColor(liveData?.net_in || 0) }}>
+          {`${t("node.downloadPrefix")} ${formatNetworkSpeedMbps(
+            liveData?.net_in || 0
+          )}`}
+        </span>
+      </Flex>
+    );
+
     switch (chartId) {
       case "cpu":
         return {
@@ -112,26 +157,7 @@ const LoadChartCard = ({
           id: "memory",
           title: t("chart.memory"),
           type: "area",
-          value: (
-            <Flex gap="0" direction="column" align="end">
-              <label>
-                {liveData?.ram
-                  ? `${formatBytes(liveData.ram)} / ${formatBytes(
-                      node.mem_total || 0
-                    )}`
-                  : t("node.notAvailable")}
-              </label>
-              <label>
-                {node.swap_total === 0
-                  ? t("node.off")
-                  : liveData?.swap
-                  ? `${formatBytes(liveData.swap)} / ${formatBytes(
-                      node.swap_total || 0
-                    )}`
-                  : t("node.notAvailable")}
-              </label>
-            </Flex>
-          ),
+          value: memoryValue,
           series: [
             {
               dataKey: "ram",
@@ -192,16 +218,7 @@ const LoadChartCard = ({
           id: "connections",
           title: t("chart.connections"),
           type: "line",
-          value: (
-            <Flex gap="0" align="end" direction="column">
-              <span>
-                {t("chart.tcpPrefix")} {liveData?.connections}
-              </span>
-              <span>
-                {t("chart.udpPrefix")} {liveData?.connections_udp}
-              </span>
-            </Flex>
-          ),
+          value: connectionsValue,
           series: [
             {
               dataKey: "connections",
@@ -223,20 +240,7 @@ const LoadChartCard = ({
           id: "network",
           title: t("chart.network"),
           type: "line",
-          value: (
-            <Flex gap="0" align="end" direction="column">
-              <span style={{ color: getNetworkSpeedColor(liveData?.net_out || 0) }}>
-                {`${t("node.uploadPrefix")} ${formatNetworkSpeedMbps(
-                  liveData?.net_out || 0
-                )}`}
-              </span>
-              <span style={{ color: getNetworkSpeedColor(liveData?.net_in || 0) }}>
-                {`${t("node.downloadPrefix")} ${formatNetworkSpeedMbps(
-                  liveData?.net_in || 0
-                )}`}
-              </span>
-            </Flex>
-          ),
+          value: networkValue,
           series: [
             {
               dataKey: "net_in",
