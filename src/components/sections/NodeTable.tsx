@@ -464,9 +464,13 @@ const NodeTableRow = ({
   }, [node.expired_at, t]);
 
   const loadLine = load.split("|").map((item) => item.trim()).join(", ");
+  const cpuThreadLabel =
+    Number.isFinite(node.cpu_cores) && node.cpu_cores > 0
+      ? String(Math.floor(node.cpu_cores))
+      : "-";
   const cpuSummary = isOnline
-    ? `${node.cpu_cores}C @ ${formatPercentage(cpuUsage)} (${loadLine})`
-    : `${node.cpu_cores}C @ ${t("node.notAvailable")} (${t("node.notAvailable")})`;
+    ? `${cpuThreadLabel} @ ${formatPercentage(cpuUsage)} (${loadLine})`
+    : `${cpuThreadLabel} @ ${t("node.notAvailable")} (${t("node.notAvailable")})`;
 
   const memSummary = isOnline && stats
     ? `${formatPercentage(memUsage)} (${formatBytes(stats.ram)} / ${formatBytes(

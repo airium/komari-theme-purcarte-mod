@@ -7,6 +7,7 @@ import {
 } from "react";
 import {
   formatBytes,
+  formatCpuCoreTopology,
   formatHardwareName,
   formatIsoDateTime,
   formatLoadValue,
@@ -159,7 +160,9 @@ const Instance = memo(({ node }: InstanceProps) => {
       ? `${normalizeDetailText(node.os)} | ${normalizeDetailText(node.arch).toLocaleUpperCase()}`
       : `${normalizeDetailText(node.os)} | ${normalizeDetailText(node.arch).toLocaleUpperCase()} | ${virtualizationText}`;
   const cpuModelSummary =
-    cpuDisplayName === "-" ? cpuDisplayName : `${cpuDisplayName} × ${node.cpu_cores}`;
+    cpuDisplayName === "-"
+      ? cpuDisplayName
+      : `${cpuDisplayName} (${formatCpuCoreTopology(node.cpu_cores, node.cpu_physical_cores)})`;
 
   const cpuSummary = stats && isOnline
     ? (

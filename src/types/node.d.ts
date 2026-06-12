@@ -5,6 +5,7 @@ export interface NodeData {
   virtualization: string;
   arch: string;
   cpu_cores: number;
+  cpu_physical_cores?: number;
   os: string;
   kernel_version: string;
   gpu_name: string;

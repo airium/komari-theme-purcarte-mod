@@ -139,6 +139,25 @@ export const formatPercentage = (
   return formatted === fallback ? fallback : `${formatted}%`;
 };
 
+const normalizeCoreCount = (value: number | null | undefined) =>
+  Number.isFinite(value) && value !== null && value !== undefined && value > 0
+    ? Math.floor(value)
+    : null;
+
+export const formatCpuCoreTopology = (
+  logicalCores: number | null | undefined,
+  physicalCores?: number | null
+) => {
+  const logical = normalizeCoreCount(logicalCores);
+  const physical = normalizeCoreCount(physicalCores);
+
+  if (logical === null) {
+    return "-";
+  }
+
+  return physical === null ? `${logical}T` : `${physical}C${logical}T`;
+};
+
 export const formatLoadValue = (
   value: number,
   significantDigits = 3,
