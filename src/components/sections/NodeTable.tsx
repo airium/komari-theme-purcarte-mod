@@ -65,17 +65,17 @@ const TABLE_COLUMN_INDEX = {
 // Native CSS Grid cannot combine a hard min, hard max, and weighted fr growth
 // for the same track, so the table resolves exact pixel widths from metadata.
 const TABLE_COLUMNS: TableColumnDefinition[] = [
-  { minRem: 1, maxRem: 1, weight: 0 },   // #
-  { minRem: 2.5, maxRem: 7, weight: 6 },  // name
-  { minRem: 0, maxRem: 20, weight: 1 }, // tags
-  { minRem: 0, maxRem: 4.5, weight: 1 },   // expire
+  { minRem: 1.0, maxRem: 1.0, weight: 0 },   // #
+  { minRem: 2.5, maxRem: 7.0, weight: 60 },  // name
+  { minRem: 0.0, maxRem: 20.0, weight: 1 }, // tags
+  { minRem: 0.0, maxRem: 4.5, weight: 10 },   // expire
   { minRem: 2.4, maxRem: 3.2, weight: 10 },   // uptime
-  { minRem: 2, maxRem: 10, weight: 4 },  // cpu
-  { minRem: 2, maxRem: 10, weight: 4 },   // ram
-  { minRem: 2, maxRem: 10, weight: 4 },   // stor
-  { minRem: 3.6, maxRem: 4.2, weight: 2 },   // speed
-  { minRem: 3.1, maxRem: 3.2, weight: 2 },   // traffic
-  { minRem: 2, maxRem: 10, weight: 4 },  // quota
+  { minRem: 2.0, maxRem: 10, weight: 80 },  // cpu
+  { minRem: 2.0, maxRem: 8.4, weight: 80 },   // ram
+  { minRem: 2.0, maxRem: 8.4, weight: 80 },   // stor
+  { minRem: 3.6, maxRem: 4.2, weight: 20 },   // speed
+  { minRem: 3.2, maxRem: 3.2, weight: 0 },   // traffic
+  { minRem: 2.0, maxRem: 10, weight: 40 },  // quota
 ];
 
 const TABLE_COLUMN_TEMPLATE = TABLE_COLUMNS.map(
@@ -144,7 +144,7 @@ const buildTableLayout = (availableWidthPx: number): ResolvedTableLayout => {
 
   let remainingWidthPx = Math.max(
     availableTrackWidthPx -
-      columns.reduce((total, column) => total + column.currentWidthPx, 0),
+    columns.reduce((total, column) => total + column.currentWidthPx, 0),
     0
   );
   let growableColumns = columns.filter(
@@ -474,14 +474,14 @@ const NodeTableRow = ({
 
   const memSummary = isOnline && stats
     ? `${formatPercentage(memUsage)} (${formatBytes(stats.ram)} / ${formatBytes(
-        node.mem_total
-      )})`
+      node.mem_total
+    )})`
     : `${t("node.notAvailable")} (${formatBytes(node.mem_total)})`;
 
   const diskSummary = isOnline && stats
     ? `${formatPercentage(diskUsage)} (${formatBytes(stats.disk)} / ${formatBytes(
-        node.disk_total
-      )})`
+      node.disk_total
+    )})`
     : `${t("node.notAvailable")} (${formatBytes(node.disk_total)})`;
 
   const compactCpuSummary = isOnline
@@ -531,8 +531,8 @@ const NodeTableRow = ({
   const lastReportTime =
     stats && typeof stats === "object"
       ? ("time" in stats && typeof stats.time === "string" && stats.time) ||
-        ("updated_at" in stats && typeof stats.updated_at === "string" && stats.updated_at) ||
-        node.updated_at
+      ("updated_at" in stats && typeof stats.updated_at === "string" && stats.updated_at) ||
+      node.updated_at
       : node.updated_at;
   const offlineHours = formatOfflineHours(lastReportTime);
 
@@ -695,11 +695,10 @@ const NodeTableRow = ({
       </div>
 
       <div
-        className={`transition-all duration-300 ease-in-out ${
-          isOpen
-            ? "max-h-[1000px] opacity-100"
-            : "max-h-0 opacity-0 overflow-hidden"
-        }`}
+        className={`transition-all duration-300 ease-in-out ${isOpen
+          ? "max-h-[1000px] opacity-100"
+          : "max-h-0 opacity-0 overflow-hidden"
+          }`}
         onTransitionEnd={() => {
           if (!isOpen) {
             setShouldRenderChart(false);
